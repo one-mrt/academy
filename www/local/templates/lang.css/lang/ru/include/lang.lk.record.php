@@ -1,0 +1,23 @@
+<?
+$MESS["LANG_LK_RECORD_SERVICE"] = "Услуги";
+$MESS["LANG_LK_RECORD_DOCTOR"] = "Врач";
+$MESS["LANG_LK_RECORD_TIME"] = "Время";
+$MESS["LANG_LK_RECORD_END"] = "Завершение";
+$MESS["LANG_LK_RECORD_NOT_SERVICE"] = "Нет услуг для записи";
+$MESS["LANG_LK_RECORD_NEXT_TIME"] = "Продолжить";
+$MESS["LANG_LK_RECORD_SERVICE_DATA"] = "Данные услуги";
+$MESS["LANG_LK_RECORD_DATA_PACIENT"] = "Пациент";
+$MESS["LANG_LK_RECORD_TIME_RECORD"] = "Время записи:";
+$MESS["LANG_LK_RECORD_DATA_NAME_SERVICE"] = "Название услуги:";
+$MESS["LANG_LK_RECORD_DATA_PRICE_SERVICE"] = "Стоимость услуги:";
+$MESS["LANG_LK_RECORD_DATA_ADR_SERVICE"] = "Адрес услуги:";
+$MESS["LANG_LK_RECORD_DATA_DOCTOR"] = "Лечащий врач:";
+$MESS["LANG_LK_RECORD_PRICE_PAY"] = "Сумма к оплате";
+$MESS["LANG_LK_RECORD_OLD_PAY"] = "Способы оплаты";
+$MESS["LANG_LK_RECORD_CARD_PAY"] = "Картой";
+$MESS["LANG_LK_RECORD_CARD_PAY_DESC"] = "Онлайн на сайте";
+$MESS["LANG_LK_RECORD_CASH_PAY"] = "Наличными";
+$MESS["LANG_LK_RECORD_CASH_PAY_DESC"] = "После проведения";
+$MESS["LANG_LK_RECORD_BUTTON_TITLE"] = "Записаться на прием";
+$MESS["langLkRecordPayMessage"] = "При оплате наличными в регистратуре необходимо явиться в учреждение за 30 минут до приему";
+$MESS["lkLkRecordPersonalPolicy"] = "Нажимая кнопку “Записаться на прием” я подтверждаю согласие на обработку персональных данных";

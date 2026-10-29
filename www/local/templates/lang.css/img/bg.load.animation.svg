@@ -1,0 +1,21 @@
+<svg width="211" height="256" viewBox="0 0 211 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <style>
+        .light-mask{ animation: highlight 1s infinite; transform-origin: center center;opacity:0.67;transform:scale(0.6)}
+        @keyframes highlight {
+            0% {transform:rotateY(0deg) scale(0.4)}
+            50% {transform:rotateY(180deg) scale(0.4)}
+            100% {transform:rotateY(360deg) scale(0.4)}
+        }
+    </style>
+    <g class="light-mask">
+        <path d="M166.492 164.528L106.387 196.491L48.2294 164.528V132.193L106.387 164.156L166.492 132.193V164.528Z" fill="#EF2D5B"/>
+        <path d="M103.361 53.9376L35.9391 109.021L107.264 146.797L180.068 103.962L106.385 97.2096L103.361 53.9376Z" fill="#EF2D5B"/>
+        <path d="M105.288 256L0 198.86V9.52592e-06H210.767V198.862L105.288 256ZM15.3663 191.139L105.297 236.859L195.4 191.134V15.3643H15.3663V191.139Z" fill="#EF2D5B"/>
+        <path d="M83.1919 10.8863L45.2373 39.8281L7.35312 10.8863H83.1919Z" fill="#EF2D5B"/>
+        <path d="M45.2352 42.9581L0 8.3974H90.5589L45.2352 42.9581ZM14.7089 13.3751L45.2375 36.6974L75.8271 13.3751H14.7089Z" fill="#EF2D5B"/>
+        <path d="M144.045 10.8863L106.095 39.8281L68.2087 10.8863H144.045Z" fill="#EF2D5B"/>
+        <path d="M106.091 42.9581L60.8531 8.3974H151.41L106.091 42.9581ZM75.5622 13.3751L106.095 36.6974L136.678 13.3751H75.5622Z" fill="#EF2D5B"/>
+        <path d="M200.752 10.8863L162.799 39.8281L124.913 10.8863H200.752Z" fill="#EF2D5B"/>
+        <path d="M162.798 42.9581L117.558 8.3974H208.117L162.798 42.9581ZM132.271 13.3751L162.8 36.6974L193.389 13.3751H132.271Z" fill="#EF2D5B"/>
+    </g>
+</svg>

@@ -1,0 +1,6 @@
+<?
+$MESS['LANG_RECORD_TITLE'] = "Записаться";
+$MESS["LANG_DIRECTION_MENU_ABOUT"] = "О направлении";
+$MESS["LANG_DIRECTION_MENU_SERVICE"] = "Услуги";
+$MESS["LANG_DIRECTION_MENU_DOCTOR"] = "Врачи";
+$MESS["LANG_DIRECTION_MENU_PRICE"] = "Цены";
