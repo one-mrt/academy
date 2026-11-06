@@ -19,6 +19,9 @@ use Bitrix\Im\Recent;
 use Bitrix\Iblock\PropertyTable;
 use Bitrix\Main\Entity\EventResult;
 
+use Bitrix\Im\V2\Chat;
+use Bitrix\Im\V2\Pull\Event\ChatHide;
+
 Loc::loadMessages(__FILE__);
 
 Loader::includeModule('im');
@@ -148,6 +151,8 @@ class Order
                     Messages::statusDefaultNotifyManager($paramNotify);
                     break;
                 case 'OP':
+                    Messages::statusPayNotifyCustomer($paramNotify);
+                    break;
                 case 'RN':
                 case 'CP':
                 case 'MN':
@@ -166,7 +171,22 @@ class Order
                     break;
                 case "CN":
                 case "F":
-                    Recent::hide($chat);
+                    // Recent::hide("chat{$chat}", $customer);
+                    // Recent::hide("chat{$chat}", $answer);
+
+                    $chatIns = Chat::getInstance($chat);
+                    \CAllIMContactList::DeleteRecent($chat, true, $customer);
+                    $pullHideUser = [$customer];
+
+                    if($answer > 0) {
+                        \CAllIMContactList::DeleteRecent($chat, true, $answer);
+                        $pullHideUser[] = $answer;
+                    }
+
+                    if ($chatIns !== null) {
+                        (new ChatHide($chat, $pullHideUser))->send();
+                    }
+
                     $newChat->DeleteUser($chat, self::MANAGER, false);
                     $paramNotify['orderUrl'] = "/lk{$paramNotify['orderUrl']}";
                     Messages::statusDefaultNotifyManager($paramNotify);
@@ -247,7 +267,7 @@ class Order
 
     public static function reSelectAnswer(int $serviceId)
     {
-        $service = Data::getTableString("LangServiceOrder")::query()
+        $service = Data::getTableString(self::$langServiceOrder)::query()
             ->setSelect(['ID', "CREATED_BY", 'order.VALUE', 'uex.VALUE', 'chat.VALUE', 'res.VALUE'])
             ->where('ID', $serviceId)
             ->where('uex.VALUE', '>', 0)
@@ -255,9 +275,9 @@ class Order
 
         if(!empty($service)) {
 
-            $customer = $service->getCreatedBy();
-            $answer = $service->getUex()?->getValue();
-            $orderId = $service->getOrder()->getValue();
+            $customer = intval($service->getCreatedBy());
+            $answer = intval($service->getUex()?->getValue());
+            $orderId =intval($service->getOrder()->getValue());
 
             // Предложение
             $offer = Data::getTableString("LangOrderOffer")::query()

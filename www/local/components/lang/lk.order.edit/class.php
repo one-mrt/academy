@@ -17,6 +17,8 @@ use Lang\Academy\Messages;
 use Lang\Academy\Util as Academy;
 use Lang\Academy\Order as AOrder;
 use Bitrix\Im\Recent;
+use Bitrix\Im\V2\Chat;
+use Bitrix\Im\V2\Pull\Event\ChatHide;
 
 Loader::includeModule("sale");
 Loader::includeModule("im");
@@ -85,7 +87,6 @@ class LangLkOrderEdit extends CBitrixComponent
 
                 $this->arResult['typeEdit'] = "all";
                 $this->query
-                    // ->addSelect('sSpec.VALUE')
                     ->addSelect('pred.VALUE')
                     ->addSelect('tWork.VALUE')
                     ->addSelect('ded.VALUE')
@@ -465,6 +466,8 @@ class LangLkOrderEdit extends CBitrixComponent
                     Messages::statusDefaultNotifyManager($param);
                     break;
                 case 'OP': // Ожидание оплаты
+                    Messages::statusPayNotifyCustomer($param);
+                    break;
                 case 'RN': // Выполняется
                 case 'CP': // Выполнен
                 case 'MN': // На доработке
@@ -476,6 +479,22 @@ class LangLkOrderEdit extends CBitrixComponent
                     Messages::statusDefaultNotifyManager($param);
                     break;
             }
+        }
+    }
+
+    private function hideChat()
+    {
+        $chat = Chat::getInstance($this->arResult['chatId']);
+        \CAllIMContactList::DeleteRecent($this->arResult['chatId'], true, $this->arResult['customerId']);
+        $pullHideUser = [$this->arResult['customerId']];
+
+        if($this->arResult['answerId'] > 0) {
+            \CAllIMContactList::DeleteRecent($this->arResult['chatId'], true, $this->arResult['answerId']);
+            $pullHideUser[] = $this->arResult['answerId'];
+        }
+
+        if ($chat !== null) {
+            (new ChatHide($chat, $pullHideUser))->send();
         }
     }
 
@@ -544,8 +563,6 @@ class LangLkOrderEdit extends CBitrixComponent
                         $this->chat->AddUser($this->arResult['chatId'], AOrder::MANAGER);
                         break;
                     case "CN": // Отменен
-                        // $this->userStatusMessageData();
-
                         if(!$this->isUserManager()) {
                             Messages::statusDefault([
                                 'user' => $this->arResult['currentUserId'],
@@ -556,7 +573,7 @@ class LangLkOrderEdit extends CBitrixComponent
                             ]);
                         }
                         
-                        Recent::hide($this->arResult['chatId']);
+                        $this->hideChat();
                         $this->chat->DeleteUser($this->arResult['chatId'], AOrder::MANAGER, false);
 
                         if($paid) {
@@ -575,7 +592,7 @@ class LangLkOrderEdit extends CBitrixComponent
                             'status' => $this->arResult['statusEditName']
                         ]);
 
-                        Recent::hide($this->arResult['chatId']);
+                        $this->hideChat();
                         $this->chat->DeleteUser($this->arResult['chatId'], AOrder::MANAGER, false);
 
                         if($paid) {
@@ -609,8 +626,6 @@ class LangLkOrderEdit extends CBitrixComponent
                         }
                         break;
                     default:
-                        // $this->userStatusMessageData();
-                        
                         if(!$this->isUserManager()) {
                             Messages::statusDefault([
                                 'user' => $this->arResult['currentUserId'],

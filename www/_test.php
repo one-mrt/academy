@@ -29,13 +29,42 @@ use Bitrix\Main\Engine\CurrentUser;
 
 // Order::reSelectAnswer(922);
 
+// echo '<pre>', print_r(\Bitrix\Im\Counter::get(), 1), '</pre>';
+
 
 use Bitrix\UI\EntitySelector\Configuration;
 
 
-$extensions = Configuration::getExtensions();
+// $extensions = Configuration::getExtensions();
 
-echo '<pre>', print_r($extensions, 1), '</pre>';
+// foreach (\Bitrix\Main\ModuleManager::getInstalledModules() as $moduleId => $moduleDesc)
+// {
+//     $settings = \Bitrix\Main\Config\Configuration::getInstance($moduleId)->get('ui.entity-selector');
+//     echo $moduleId . '<br>';
+//     echo '<pre>', print_r($settings, 1), '</pre>';
+//     // if (empty($settings) || !is_array($settings))
+//     // {
+//     //     continue;
+//     // }
+// }
+
+// $settings = \Bitrix\Main\Config\Configuration::getInstance("im")->get('ui.entity-selector');
+
+// echo '<pre>', print_r($settings, 1), '</pre>';
+
+// \CIMSettings::SetSetting(\CIMSettings::SETTINGS, [
+//         'sendByEnter' => 'Y',
+//         'privacyMessage' => 'all',
+//         'privacyCall' => 'all',
+//         'privacyChat' => 'all',
+//         'privacySearch' => 'all',
+//         'enableDarkTheme' => 'light',
+//         'notifyScheme' => 'expert',
+//         'notifyAutoRead' => false,
+//         'viewBirthday' => false,
+//         'notifySchemeSendSite' => true,
+//         'notifySchemeSendEmail' => true
+//     ], 10);
 
 $toUser = 1;
 $fromUser = 7;

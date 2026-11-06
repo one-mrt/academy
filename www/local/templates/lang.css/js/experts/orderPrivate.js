@@ -9,7 +9,7 @@ LG.AddOrder = class extends LG.Dialog
 
     constructor() {
         super()
-        this.user = LG.ExpertData.userId
+        this.user = LG?.ExpertData?.userId
         this.btn = document.querySelector('.lang-order--private')
         this.public = document.querySelector('.lang-order--add')
         this.btn?.addEventListener('click', this.initOrder.bind(this))

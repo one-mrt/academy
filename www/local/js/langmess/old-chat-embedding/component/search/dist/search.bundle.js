@@ -100,9 +100,10 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 		computed: {
 			users() {
 				const recentUsers = [];
-				this.$store.getters['recent/getSortedCollection'].forEach(recentItem => {
-					const dialog = this.$store.getters['dialogues/get'](recentItem.dialogId, true);
-					const user = this.$store.getters['users/get'](recentItem.dialogId, true);
+				let store = im_oldChatEmbedding_application_core.Core.getStore();
+				store.getters['recent/getSortedCollection'].forEach(recentItem => {
+					const dialog = store.getters['dialogues/get'](recentItem.dialogId, true);
+					const user = store.getters['users/get'](recentItem.dialogId, true);
 					recentUsers.push({
 						...recentItem,
 						dialog,
@@ -115,7 +116,8 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 				return usersWithoutBotsAndCurrentUser.slice(0, recentUsersLimit);
 			},
 			currentUserId() {
-				return this.$store.state.application.common.userId;
+				let store = im_oldChatEmbedding_application_core.Core.getStore();
+				return store.state.application.common.userId;
 			}
 		},
 		// language=Vue
@@ -188,13 +190,13 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 			}
 		},
 		template: `
-		<div class="bx-messenger-search-result-section-wrapper">
-			<div class="bx-messenger-search-result-section-title">{{title}}</div>
-			<div>
-				<component :is="component" v-for="item in sectionItems" :key="item.getEntityFullId()" :item="item" />
-			</div>
-			<div v-if="showMore" class="bx-messenger-search-result-section-show-more" @click.prevent="onShowMore">
-				{{ showMoreButtonText }}
+		<div class="w-100 h-100 d-f fd-c">
+			<div class="w-100 pby-8 pix-16 c-8c94a8 f-12 bbw-1 bbs-s bbc-525c6914">{{title}}</div>
+			<component :is="component" v-for="item in sectionItems" :key="item.getEntityFullId()" :item="item" />
+			<div class="w-100 d-f jc-c pby-8">
+				<div v-if="showMore" class="pix-12 pby-4 bc-py c-w m-0 bw-1 bs-s bcr-py r-999 lh-1 f-12 tt-l h:bc-w h:c-dt tn-all-3 pn-r z-2" @click.prevent="onShowMore">
+					{{ showMoreButtonText }}
+				</div>
 			</div>
 		</div>
 	`
@@ -202,6 +204,7 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 
 	const EntityIdTypes = Object.freeze({
 		user: 'user',
+		langUser: 'lang-user',
 		bot: 'im-bot',
 		chat: 'im-chat',
 		chatUser: 'im-chat-user',
@@ -219,6 +222,7 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 			switch (entityId) {
 				case EntityIdTypes.user:
 				case EntityIdTypes.bot:
+				case EntityIdTypes.langUser:
 					return 'user';
 				case EntityIdTypes.chat:
 				case EntityIdTypes.chatUser:
@@ -512,214 +516,6 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 		}
 	}
 
-	const OpenlineAvatarType = {
-		lines: 'lines',
-		network: 'network',
-		livechat: 'livechat',
-		whatsappbytwilio: 'whatsappbytwilio',
-		avito: 'avito',
-		viber: 'viber',
-		telegrambot: 'telegrambot',
-		imessage: 'imessage',
-		wechat: 'wechat',
-		yandex: 'yandex',
-		vkgroup: 'vkgroup',
-		ok: 'ok',
-		olx: 'olx',
-		facebook: 'facebook',
-		facebookcomments: 'facebookcomments',
-		fbinstagramdirect: 'fbinstagramdirect',
-		fbinstagram: 'fbinstagram',
-		notifications: 'notifications'
-	};
-	const AvatarOpenline = {
-		name: 'Avatar',
-		props: {
-			item: {
-				type: SearchItem,
-				required: true
-			},
-			size: {
-				type: String,
-				default: im_oldChatEmbedding_component_elements.AvatarSize.M
-			}
-		},
-		computed: {
-			openlineType() {
-				return this.item.getOpenlineEntityId();
-			},
-			chatAvatarStyle() {
-				return {
-					backgroundImage: `url('${this.item.getAvatar()}')`
-				};
-			},
-			chatTypeIconClasses() {
-				if (OpenlineAvatarType[this.openlineType]) {
-					return `bx-im-search-avatar-openline__icon-${this.openlineType}`;
-				}
-				return 'bx-im-search-avatar-openline__icon-lines';
-			},
-			needCrmBadge() {
-				if (!this.isCrmAvailable) {
-					return false;
-				}
-				return this.item.isCrmSession();
-			}
-		},
-		created() {
-			this.isCrmAvailable = main_core.Extension.getSettings('im.old-chat-embedding.component.search').get('isCrmAvailable', false);
-		},
-		template: `
-		<div 
-			:title="item.getTitle()" 
-			:class="'bx-im-search-avatar-openline__size-' + size.toLowerCase()" 
-			class="bx-im-search-avatar-openline__wrap"
-		>
-			<div 
-				v-if="item.getAvatar()" 
-				:style="chatAvatarStyle" 
-				class="bx-im-search-avatar-openline__content bx-im-search-avatar-openline__image"
-			></div>
-			<div 
-				v-else 
-				:style="{backgroundColor: this.item.getAvatarColor()}" 
-				:class="chatTypeIconClasses" 
-				class="bx-im-search-avatar-openline__content bx-im-search-avatar-openline__icon"
-			></div>
-			<div v-if="needCrmBadge" class="bx-im-search-avatar-openline__crm-badge"></div>
-		</div>
-	`
-	};
-
-	const SearchResultOpenlineItem = {
-		name: 'SearchResultOpenlineItem',
-		components: {
-			AvatarOpenline
-		},
-		props: {
-			item: {
-				type: SearchItem,
-				required: true
-			}
-		},
-		computed: {
-			title() {
-				return im_oldChatEmbedding_lib_utils.Utils.text.htmlspecialcharsback(this.item.getTitle());
-			}
-		},
-		methods: {
-			onClick(event) {
-				main_core_events.EventEmitter.emit(im_oldChatEmbedding_const.EventType.dialog.open, {
-					dialogId: this.item.getDialogId(),
-					chat: SearchUtils.convertKeysToLowerCase(this.item.getChatCustomData())
-				});
-				if (!event.altKey) {
-					BX.MessengerProxy.clearSearchInput();
-				}
-			}
-		},
-		template: `
-		<div @click="onClick" class="bx-im-search-item">
-			<div class="bx-im-search-avatar-wrap">
-				<AvatarOpenline :item="item" size="L"></AvatarOpenline>
-			</div>
-			<div class="bx-im-search-result-item-content bx-im-search-result-item-department-content">
-				<div v class="bx-im-component-chat-title-wrap">
-					<div class="bx-im-component-chat-name-text" :title="item.getTitle()">{{title}}</div>
-				</div>
-			</div>
-		</div>
-	`
-	};
-
-	const SearchResultNetworkItem = {
-		name: 'SearchResultNetworkItem',
-		props: {
-			item: {
-				type: Object,
-				required: true
-			}
-		},
-		data: function () {
-			return {
-				isLoading: false
-			};
-		},
-		computed: {
-			hasAvatar() {
-				return this.item.getAvatar() !== '';
-			},
-			avatarStyle() {
-				if (!this.hasAvatar) {
-					return {
-						backgroundColor: this.item.getAvatarOptions().color
-					};
-				}
-				return {
-					backgroundImage: `url('${this.item.getAvatar()}')`
-				};
-			},
-			title() {
-				return im_oldChatEmbedding_lib_utils.Utils.text.htmlspecialcharsback(this.item.getTitle());
-			}
-		},
-		methods: {
-			onClick(event) {
-				this.isLoading = true;
-				const networkCode = this.item.getId().replace('networkLines', '');
-				main_core_events.EventEmitter.emitAsync(im_oldChatEmbedding_const.EventType.search.openNetworkItem, networkCode).then(eventResult => {
-					if (eventResult[0].error) {
-						console.error('Error:', eventResult[0].error);
-						this.isLoading = false;
-						return;
-					}
-					const dialogId = eventResult[0].id.toString();
-					const user = this.$store.getters['users/get'](dialogId, true);
-					const dialog = this.$store.getters['dialogues/get'](dialogId, true);
-					main_core_events.EventEmitter.emit(im_oldChatEmbedding_const.EventType.dialog.open, {
-						dialogId: dialogId,
-						chat: dialog,
-						user: user
-					});
-					this.isLoading = false;
-					if (!event.altKey) {
-						BX.MessengerProxy.clearSearchInput();
-					}
-				}).catch(error => {
-					console.error(error);
-					this.isLoading = false;
-				});
-			}
-		},
-		template: `
-		<div @click="onClick" class="bx-im-search-item">
-			<div class="bx-im-search-avatar-wrap">
-				<div :title="item.getTitle()" class="bx-im-component-avatar-wrap bx-im-component-avatar-size-l">
-					<div
-						class="bx-im-component-avatar-content bx-im-component-avatar-image"
-						:class="[hasAvatar ? '' : 'bx-im-search-network-icon']"
-						:style="avatarStyle"
-					></div>
-				</div>
-			</div>
-			<div class="bx-im-search-result-item-content">
-				<div v class="bx-im-component-chat-title-wrap">
-					<div class="bx-im-component-chat-name-left-icon bx-im-component-chat-name-left-icon-network"></div>
-					<div class="bx-im-component-chat-name-text bx-im-search-network-title">
-						{{title}}
-					</div>
-				</div>
-				<div class="bx-im-search-item-content-bottom">
-					<div class="bx-im-search-result-item-text-wrap">
-						<div class="bx-im-search-result-item-text">{{ item.getSubtitle() }}</div>
-					</div>
-					<div v-if="isLoading" class="bx-search-loader bx-search-loader-small-size"></div>
-				</div>
-			</div>
-		</div>
-	`
-	};
-
 	const SearchResultItem = {
 		name: 'SearchResultItem',
 		components: {
@@ -742,46 +538,69 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 				return this.item.getDialogId();
 			},
 			user() {
-				return this.$store.getters['users/get'](this.dialogId, true);
+				let store = im_oldChatEmbedding_application_core.Core.getStore();
+				let user = store.getters['users/get'](this.dialogId, true)
+
+				return user;
 			},
 			dialog() {
-				return this.$store.getters['dialogues/get'](this.dialogId, true);
+				let store = im_oldChatEmbedding_application_core.Core.getStore();
+				let dialog = store.getters['dialogues/get'](this.dialogId, true)
+
+				return dialog
 			},
 			isChat() {
 				return !this.isUser;
 			},
 			isUser() {
-				return this.dialog.type === im_oldChatEmbedding_const.DialogType.user;
+				if(Number(this?.user?.id) > 1) {
+					return true;
+				}
+
+				return false
 			},
 			userItemText() {
 				if (!this.isUser) {
 					return '';
+				} else {
+					let store = im_oldChatEmbedding_application_core.Core.getStore();
+					let user = store.getters['users/get'](this.dialogId)
+
+					if(user) {
+						// if (user?.status) {
+						// 	return user?.status;
+						// }
+						return "Личный чат"
+
+						return user?.position;
+					}
 				}
-				const status = this.$store.getters['users/getLastOnline'](this.dialogId);
-				if (status) {
-					return status;
-				}
-				return this.$store.getters['users/getPosition'](this.dialogId);
+
+				return ''
 			},
 			chatItemText() {
 				if (this.isUser) {
 					return '';
 				}
-				if (this.dialog.type === im_oldChatEmbedding_const.DialogType.open) {
-					return this.$Bitrix.Loc.getMessage('IM_SEARCH_ITEM_CHAT_TYPE_OPEN');
-				}
-				return this.$Bitrix.Loc.getMessage('IM_SEARCH_ITEM_CHAT_TYPE_GROUP');
+
+				// if (this?.dialog?.type === im_oldChatEmbedding_const.DialogType.open) {
+				// 	return this.$Bitrix.Loc.getMessage('IM_SEARCH_ITEM_CHAT_TYPE_OPEN');
+				// }
+
+				return "Чат задачи"//this.$Bitrix.Loc.getMessage('IM_SEARCH_ITEM_CHAT_TYPE_GROUP');
 			},
 			searchEntityId() {
 				if (this.isUser) {
 					return this.user.bot ? 'im-bot' : 'user';
 				}
+
 				return 'im-chat';
 			},
 			searchItemId() {
 				if (this.dialogId.startsWith('chat')) {
 					return Number.parseInt(this.dialogId.slice(4), 10);
 				}
+
 				return Number.parseInt(this.dialogId, 10);
 			},
 			AvatarSize: () => im_oldChatEmbedding_component_elements.AvatarSize
@@ -813,25 +632,27 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 			}
 		},
 		template: `
-		<div @click="onClick" @click.right.prevent="onRightClick" class="bx-im-search-item" :class="[this.child ? 'bx-im-search-sub-item' : '']">
+		<div @click="onClick" @click.right.prevent="onRightClick" class="bx-im-recent-item" :class="[this.child ? 'bx-im-search-sub-item' : '']">
 			<div class="bx-im-search-avatar-wrap">
 				<Avatar :dialogId="dialogId" :size="AvatarSize.L" />
 			</div>
-			<div v-if="isUser" class="bx-im-search-result-item-content">
+
+			<div v-if="isUser" class="bx-im-recent-item-content d-f fd-c">
 				<ChatTitle :dialogId="dialogId" />
-				<div class="bx-im-search-item-content-bottom">
-					<div class="bx-im-search-result-item-text-wrap">
-						<div class="bx-im-search-result-item-text">
-							{{ userItemText }}
+				<div class="bx-im-recent-item-content-bottom">
+					<div class="bx-im-recent-item-bottom-subtitle">
+						<div class="bx-im-recent-item-bottom-subtitle-text">
+							{{ userItemText }} 
 						</div>
 					</div>
 				</div>
 			</div>
-			<div v-else class="bx-im-search-result-item-content">
+
+			<div v-else class="bx-im-recent-item-content d-f fd-c">
 				<ChatTitle :dialogId="dialogId" />
-				<div class="bx-im-search-item-content-bottom">
-					<div class="bx-im-search-result-item-text-wrap">
-						<div class="bx-im-search-result-item-text">{{ chatItemText }}</div>
+				<div class="bx-im-recent-item-content-bottom">
+					<div class="bx-im-recent-item-bottom-subtitle">
+						<div class="bx-im-recent-item-bottom-subtitle-text">{{ chatItemText }}</div>
 					</div>
 				</div>
 			</div>
@@ -1030,113 +851,34 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 			return {
 				dialog: {
 					entities: [
-						// {
-						// 	id: 'im-bot',
-						// 	options: {
-						// 		searchableBotTypes: ['H', 'B', 'S', 'N'],
-						// 		fillDialogWithDefaultValues: false
-						// 	},
-						// 	dynamicLoad: true,
-						// 	dynamicSearch: true
-						// },
 						{
-							id: 'user',
-							dynamicLoad: true,
-							dynamicSearch: true,
-							filters: [{
-								id: 'im.userDataFilter'
-							}]
-						},
-						// Disable - chat with users section
-						{
-							id: 'im-chat-user',
-							options: {
-								searchableChatTypes: [
-									'C',
-									'O'
-								],
-								fillDialogWithDefaultValues: false,
-							},
+							id: 'lang-user',
 							dynamicLoad: true,
 							dynamicSearch: true,
 						},
 						{
 							id: 'im-chat',
 							options: {
-								searchableChatTypes: ['C', 'O', 'L'],
-								fillDialogWithDefaultValues: false
+								searchableChatTypes: ['C', 'L', 'O'],
+								fillDialogWithDefaultValues: false,
 							},
 							dynamicLoad: true,
 							dynamicSearch: true
 						},
 					],
+					enableSearch: true,
 					preselectedItems: [],
 					clearUnavailableItems: false,
 					context: 'IM_CHAT_SEARCH',
 					id: 'im-search'
 				}
 			};
-		},
-		getNetworkEntity: () => {
-			return {
-				id: 'imbot-network',
-				dynamicSearch: true,
-				options: {
-					'filterExistingLines': true
-				}
-			};
-		},
-		getDepartmentEntity: () => {
-			return {
-				id: 'department',
-				dynamicLoad: true,
-				dynamicSearch: true,
-				options: {
-					selectMode: 'usersAndDepartments',
-					allowSelectRootDepartment: true
-				},
-				filters: [{
-					id: 'im.departmentDataFilter'
-				}]
-			};
-		},
-		getChatEntity: () => {
-			return {
-				id: 'im-chat',
-				options: {
-					searchableChatTypes: ['C', 'O', 'L'],
-					fillDialogWithDefaultValues: false
-				},
-				dynamicLoad: true,
-				dynamicSearch: true
-			};
-		},
-		getLinesEntity: () => {
-			return {
-				id: 'imol-chat',
-				dynamicLoad: true,
-				dynamicSearch: true
-			};
 		}
 	};
 
 	class SearchRecentList {
 		constructor($Bitrix) {
-			
-			// this.store = $Bitrix.Data.get('controller').store;
-
-			// im_oldChatEmbedding_application_core.Core.ready().then(controller => {
-			// 	console.info(controller, this.store)
-			// 	this.store = controller.store;
-			// 	// this.controllerEmb = controller;
-			// 	// resolve();
-			// });
-			new Promise((resolve, reject) => {
-				im_oldChatEmbedding_application_core.Core.ready().then(controller => {
-					this.store = controller.store;
-					resolve();
-				});
-			});
+			this.store = im_oldChatEmbedding_application_core.Core.getStore()
 		}
 
 		// region public methods
@@ -1153,10 +895,7 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 		//endregion
 
 		getRecentListItems() {
-			// console.info(this.store)
-			console.info(this.store.getters['recent/getSortedCollection'])
 			return this.store.getters['recent/getSortedCollection'].map(item => {
-			// return this.store.getters['recent/get'].map(item => {
 				const dialog = this.store.getters['dialogues/get'](item.dialogId, true);
 				const isUser = dialog.type === im_oldChatEmbedding_const.DialogType.user;
 				const recentListItem = {
@@ -1226,18 +965,20 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 			if (!this.instance) {
 				this.instance = new this($Bitrix, cache, recentList);
 			}
+
 			return this.instance;
 		}
-		constructor($Bitrix, cache, recentList) {
-			this.store = $Bitrix.Data.get('controller').store;
+		constructor($Bitrix, cache, recentList) { 
+			this.store = im_oldChatEmbedding_application_core.Core.getStore()
 			this.cache = cache;
 			this.recentList = recentList;
 			this.restClient = $Bitrix.RestClient.get();
 			this.applicationLayout = $Bitrix.Application.get().params.layout;
 			this.onItemSelectHandler = this.onItemSelect.bind(this);
 			this.onOpenNetworkItemHandler = this.onOpenNetworkItem.bind(this);
+
 			main_core_events.EventEmitter.subscribe(im_oldChatEmbedding_const.EventType.search.selectItem, this.onItemSelectHandler);
-			main_core_events.EventEmitter.subscribe(im_oldChatEmbedding_const.EventType.search.openNetworkItem, this.onOpenNetworkItemHandler);
+			// main_core_events.EventEmitter.subscribe(im_oldChatEmbedding_const.EventType.search.openNetworkItem, this.onOpenNetworkItemHandler);
 		}
 
 		//region Public methods
@@ -1245,14 +986,13 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 		loadRecentSearchFromCache() {
 			return this.cache.loadRecentFromCache().then(responseFromCache => {
 				im_oldChatEmbedding_lib_logger.Logger.warn('Im.Search: Recent search loaded from cache');
+
 				return responseFromCache;
 			}).then(responseFromCache => {
-				const {
-					items,
-					recentItems
-				} = responseFromCache;
+				const {items, recentItems} = responseFromCache;
 				const itemMap = SearchUtils.createItemMap(items);
 				const filteredItems = this.#filterResult(itemMap);
+
 				return this.updateModels(filteredItems).then(() => {
 					return this.getItemsFromRecentItems(recentItems, filteredItems);
 				});
@@ -1260,11 +1000,11 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 		}
 		loadRecentSearchFromServer() {
 			return this.loadRecentFromServer().then(responseFromServer => {
-				console.info(responseFromServer)
 				im_oldChatEmbedding_lib_logger.Logger.warn('Im.Search: Recent search loaded from server');
 				const items = SearchUtils.createItemMap(responseFromServer.items);
 				const recentItems = SearchUtils.prepareRecentItems(responseFromServer.recentItems);
 				const filteredItems = this.#filterResult(items);
+
 				return this.updateModels(filteredItems, true).then(() => {
 					return this.getItemsFromRecentItems(recentItems, filteredItems);
 				});
@@ -1272,12 +1012,12 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 		}
 		searchLocal(query) {
 			const originalLayoutQuery = query.trim().toLowerCase();
-			// const searchInCachePromise = this.searchInCache(originalLayoutQuery);
+			const searchInCachePromise = this.searchInCache(originalLayoutQuery);
 			const searchInRecentListPromise = this.searchInRecentList(originalLayoutQuery);
-			return Promise.all([/*searchInCachePromise,*/ searchInRecentListPromise]).then(result => {
+			return Promise.all([searchInCachePromise, searchInRecentListPromise]).then(result => {
 				// Spread order is important, because we have more data in cache than in recent list
 				// (for example contextSort field)
-				const items = new Map([/*...result[1],*/ ...result[0]]);
+				const items = new Map([...result[1], ...result[0]]);
 				return this.getSortedItems(items, originalLayoutQuery);
 			});
 		}
@@ -1325,7 +1065,8 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 			return Promise.all([correctLayoutSearchPromise, wrongLayoutSearchPromise]).then(result => {
 				return new Map([...result[0], ...result[1]]);
 			}).catch(error => {
-				console.error('Unknown exception', error);
+				console.info(error)
+				// console.error('Unknown exception', error);
 				return new Map();
 			});
 		}
@@ -1475,11 +1216,6 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 			const config = {
 				json: this.getSearchConfig()
 			};
-			/*
-					const chatEntity = Config.getChatEntity();
-					chatEntity.options.searchableChatTypes = ['C', 'O'];
-					config.json.dialog.entities.push(chatEntity);
-			*/
 			return new Promise((resolve, reject) => {
 				main_core.ajax.runAction('ui.entityselector.load', config).then(response => {
 					im_oldChatEmbedding_lib_logger.Logger.warn(`Im.Search: Recent search request result`, response);
@@ -1495,8 +1231,6 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 					parentItem
 				}
 			};
-			const departmentEntity = Config.getDepartmentEntity();
-			config.json.dialog.entities.push(departmentEntity);
 			return new Promise((resolve, reject) => {
 				main_core.ajax.runAction('ui.entityselector.getChildren', config).then(response => {
 					im_oldChatEmbedding_lib_logger.Logger.warn('Im.Search: load department users result', response);
@@ -1509,22 +1243,6 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 			const config = {
 				json: this.getSearchConfig()
 			};
-			if (requestConfig.network) {
-				const networkEntity = Config.getNetworkEntity();
-				config.json.dialog.entities.push(networkEntity);
-			}
-			if (requestConfig.departments) {
-				const departmentEntity = Config.getDepartmentEntity();
-				config.json.dialog.entities.push(departmentEntity);
-			}
-			if (requestConfig.chats) {
-				const chatEntity = Config.getChatEntity();
-				config.json.dialog.entities.push(chatEntity);
-			}
-			if (requestConfig.lines) {
-				const chatEntity = Config.getLinesEntity();
-				config.json.dialog.entities.push(chatEntity);
-			}
 			config.json.searchQuery = {
 				'queryWords': SearchUtils.getWordsFromString(query.trim()),
 				'query': query.trim()
@@ -1541,8 +1259,6 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 			const config = {
 				json: this.getSearchConfig()
 			};
-			const networkEntity = Config.getNetworkEntity();
-			config.json.dialog.entities = [networkEntity];
 			config.json.searchQuery = {
 				'queryWords': SearchUtils.getWordsFromString(query.trim()),
 				'query': query.trim()
@@ -1566,20 +1282,15 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 					recentItems
 				}
 			};
-			const chatEntity = Config.getChatEntity();
-			config.json.dialog.entities.push(chatEntity);
 			main_core.ajax.runAction('ui.entityselector.saveRecentItems', config);
 		}
 		updateModels(items, set = false) {
-			const {
-				users,
-				dialogues
-			} = this.prepareDataForModels(items);
-			console.info(items)
+			const {users, dialogues} = this.prepareDataForModels(items);
 			const usersActionName = set ? 'users/set' : 'users/add';
 			const dialoguesActionName = set ? 'dialogues/set' : 'dialogues/add';
 			const usersPromise = this.store.dispatch(usersActionName, users);
 			const dialoguesPromise = this.store.dispatch(dialoguesActionName, dialogues);
+
 			return Promise.all([usersPromise, dialoguesPromise]);
 		}
 		prepareDataForModels(items) {
@@ -1695,135 +1406,9 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 			return new Map(filteredItems);
 		}
 		#isItemAllowedInLinesSearch(item) {
-			return item.isUser() || item.isLines();
+			return item.isUser() || item.isLines() || item.isChat();
 		}
 	}
-
-	// @vue/component
-	const SearchResultDepartmentItem = {
-		name: 'SearchResultDepartmentItem',
-		components: {
-			SearchResultItem
-		},
-		props: {
-			item: {
-				type: Object,
-				required: true
-			}
-		},
-		data: function () {
-			return {
-				expanded: false,
-				isLoading: false,
-				usersInDepartment: []
-			};
-		},
-		computed: {
-			departmentAvatarStyle() {
-				if (this.item.avatarOptions?.color) {
-					return {
-						backgroundColor: this.item.avatarOptions.color
-					};
-				}
-				return {
-					backgroundColor: '#df532d'
-				};
-			},
-			title() {
-				return im_oldChatEmbedding_lib_utils.Utils.text.htmlspecialcharsback(this.item.title);
-			}
-		},
-		created() {
-			const cache = new SearchCache(this.getCurrentUserId());
-			const recentList = new SearchRecentList(this.$Bitrix);
-			this.searchService = SearchService.getInstance(this.$Bitrix, cache, recentList);
-		},
-		methods: {
-			onClick() {
-				if (!this.expanded) {
-					this.openDepartment();
-				} else {
-					this.closeDepartment();
-				}
-			},
-			openDepartment() {
-				this.isLoading = true;
-				if (main_core.Type.isArrayFilled(this.usersInDepartment)) {
-					this.isLoading = false;
-					this.expanded = true;
-					return;
-				}
-				this.searchService.loadDepartmentUsers(this.item).then(usersAndDepartments => {
-					this.usersInDepartment = [...usersAndDepartments.values()].filter(user => user.isUser());
-					this.isLoading = false;
-					this.expanded = true;
-				});
-			},
-			closeDepartment() {
-				this.expanded = false;
-			},
-			getCurrentUserId() {
-				return this.$store.state.application.common.userId;
-			},
-			enterTransition(element) {
-				main_core.Dom.style(element, 'height', 0);
-				main_core.Dom.style(element, 'opacity', 0);
-				requestAnimationFrame(() => {
-					requestAnimationFrame(() => {
-						main_core.Dom.style(element, 'opacity', 1);
-						main_core.Dom.style(element, 'height', `${element.scrollHeight}px`);
-					});
-				});
-			},
-			afterEnterTransition(element) {
-				main_core.Dom.style(element, 'height', 'auto');
-			},
-			leaveTransition(element) {
-				main_core.Dom.style(element, 'height', `${element.scrollHeight}px`);
-				requestAnimationFrame(() => {
-					main_core.Dom.style(element, 'height', 0);
-					main_core.Dom.style(element, 'opacity', 0);
-				});
-			}
-		},
-		// language=Vue
-		template: `
-		<div @click="onClick" class="bx-im-search-item">
-			<div class="bx-im-search-avatar-wrap">
-				<div :title="item.title" class="bx-im-component-avatar-wrap bx-im-component-avatar-size-l">
-					<div 
-						class="bx-im-component-avatar-content bx-im-component-avatar-image bx-search-item-department-icon"
-						:style="departmentAvatarStyle"
-					></div>
-				</div>
-			</div>
-			<div class="bx-im-search-result-item-content bx-im-search-result-item-department-content">
-				<div class="bx-im-component-chat-title-wrap">
-					<div class="bx-im-component-chat-name-text">
-						{{title}}
-					</div>
-				</div>
-				<div class="bx-search-item-department-expand-button">
-					<div v-if="isLoading" class="bx-search-loader bx-search-loader-large-size bx-search-item-department-expand-loader"></div>
-					<div v-else-if="expanded" class="bx-search-item-department-down-arrow"></div>
-					<div v-else class="bx-search-item-department-up-arrow"></div>
-				</div>
-			</div>
-		</div>
-		<transition
-			name="bx-im-search-department-expand"
-			@enter="enterTransition"
-			@after-enter="afterEnterTransition"
-			@leave="leaveTransition"
-		>
-			<div v-if="expanded" class="bx-search-department-users-wrapper">
-				<div class="bx-search-department-users">
-					<SearchResultItem v-for="user in usersInDepartment" :key="user.getEntityFullId()" :item="user" :child="true"/>
-				</div>
-			</div>
-		</transition>
-	`
-	};
 
 	/**
 	* @bitrixEvents EventType.search.openContextMenu
@@ -1836,9 +1421,6 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 			RecentUsersCarousel,
 			SearchResultSection,
 			LoadingState: im_oldChatEmbedding_component_elements.RecentLoadingState,
-			SearchResultOpenlineItem,
-			SearchResultNetworkItem,
-			SearchResultDepartmentItem,
 			SearchResultItem
 		},
 		props: {
@@ -1876,10 +1458,13 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 				if (this.isServerLoading || this.isLocalLoading || this.isNetworkLoading) {
 					return false;
 				}
+
 				const openLinesLayout = this.applicationLayout === im_oldChatEmbedding_const.ApplicationLayout.lines;
+
 				if (!openLinesLayout && this.isNetworkSearchEnabled && !this.isNetworkButtonClicked && this.isServerSearch) {
 					return false;
 				}
+
 				return this.result.usersAndChats.size === 0 && this.result.departments.size === 0 && this.result.chatUsers.size === 0 && this.result.openLines.size === 0 && this.result.network.size === 0;
 			},
 			isLoadingState() {
@@ -1907,9 +1492,6 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 				return this.isNetworkSearchEnabled || this.isNetworkSearchCode;
 			},
 			itemComponent: () => SearchResultItem,
-			itemDepartmentComponent: () => SearchResultDepartmentItem,
-			itemNetworkComponent: () => SearchResultNetworkItem,
-			itemOpenlineComponent: () => SearchResultOpenlineItem
 		},
 		watch: {
 			searchQuery(newValue, oldValue) {
@@ -1918,21 +1500,22 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 				if (newQuery === previousQuery) {
 					return;
 				}
+
 				this.startSearch(newQuery);
 			},
 			searchMode(newValue, oldValue) {
-				if (newValue === false && oldValue === true)
-					// search switch off
-					{
-						this.isNetworkButtonClicked = false;
-					} else if (newValue === true && oldValue === false)
-					// search switch on
-					{
-						if (this.result.recent.size > 0) {
-							return;
-						}
-						this.isRecentLoading = true;
+				if (newValue === false && oldValue === true) // search switch off
+				{
+					this.isNetworkButtonClicked = false;
+				} else if (newValue === true && oldValue === false) // search switch on
+				{
+					if (this.result.recent.size > 0) {
+						return;
 					}
+
+					this.isRecentLoading = true;
+				}
+
 				this.searchService.loadRecentSearchFromServer().then(recentItems => {
 					this.result.recent = recentItems;
 					this.isRecentLoading = false;
@@ -1951,6 +1534,7 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 			main_core_events.EventEmitter.subscribe(im_oldChatEmbedding_const.EventType.dialog.errors.accessDenied, this.onDelete);
 			main_core_events.EventEmitter.subscribe(im_oldChatEmbedding_const.EventType.search.selectItem, this.onSelectItem);
 			main_core_events.EventEmitter.subscribe(im_oldChatEmbedding_const.EventType.recent.updateSearch, this.onPressEnterKey);
+
 			this.loadInitialRecentFromCache();
 		},
 		beforeUnmount() {
@@ -1964,20 +1548,16 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 		methods: {
 			loadInitialRecentFromCache() {
 				// we don't need an extra request to get recent items while messenger initialization
-				// this.searchService.loadRecentSearchFromCache().then(recentItems => {
-				// 	this.result.recent = recentItems;
-				// });
-				this.searchService.loadRecentSearchFromServer().then(recentItems => {
+				this.searchService.loadRecentSearchFromCache().then(recentItems => {
 					this.result.recent = recentItems;
-					console.info(recentItems)
 				});
 			},
 			initSettings() {
-				const settings = main_core.Extension.getSettings('im.old-chat-embedding.component.search');
+				const settings = main_core.Extension.getSettings('langmess.old-chat-embedding.component.search');
 				const defaultMinTokenSize = 3;
 				this.minTokenSize = settings.get('minTokenSize', defaultMinTokenSize);
 				this.isNetworkAvailable = settings.get('isNetworkAvailable', false);
-				this.isNetworkSearchEnabled = settings.get('isNetworkSearchEnabled', true);
+				this.isNetworkSearchEnabled = settings.get('isNetworkSearchEnabled', false);
 				this.isDepartmentsAvailable = settings.get('isDepartmentsAvailable', false);
 			},
 			startSearch(searchQuery) {
@@ -2015,13 +1595,10 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 				this.currentServerQueries++;
 				this.isNetworkLoading = this.isNetworkButtonClicked;
 				const config = {
-					lines: true
+					lines: true,
+					// users: true,
+					// chats: true
 				};
-				if (this.applicationLayout === im_oldChatEmbedding_const.ApplicationLayout.full) {
-					config.network = this.isNetworkAvailableForSearch && this.isNetworkButtonClicked;
-					config.departments = !BX.MessengerProxy.isCurrentUserExtranet() && this.isDepartmentsAvailable;
-					config.chats = true;
-				}
 				const queryBeforeRequest = query;
 				this.searchService.searchOnServer(query, config).then(searchResultFromServer => {
 					if (queryBeforeRequest !== this.searchQuery.trim()) {
@@ -2034,7 +1611,8 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 					this.result.openLines = searchResultFromServer.openLines;
 					this.result.network = searchResultFromServer.network;
 				}).catch(error => {
-					console.error(error);
+					console.info(error)
+					// console.error(error);
 				}).finally(() => {
 					this.currentServerQueries--;
 					this.stopLoader();
@@ -2081,9 +1659,8 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 			onDelete({
 				data: eventData
 			}) {
-				const {
-					dialogId
-				} = eventData;
+				const {dialogId} = eventData;
+
 				this.result.recent.delete(dialogId);
 				this.result.usersAndChats.delete(dialogId);
 				this.result.chatUsers.delete(dialogId);
@@ -2095,26 +1672,38 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 				this.searchOnNetwork(this.searchQuery);
 			},
 			onSelectItem(event) {
-				const {
-					selectedItem,
-					nativeEvent
-				} = event.getData();
+				const {selectedItem, nativeEvent} = event.getData();
+				let data = {};
+				let store = im_oldChatEmbedding_application_core.Core.getStore();
+
+				if(selectedItem.entityId == 'im-chat') {
+					data = store.getters['dialogues/get'](selectedItem.dialogId, true)
+				} else {
+					data = store.getters['users/get'](selectedItem.dialogId, true)
+				}
+
+				data.id = selectedItem.dialogId
+
 				main_core_events.EventEmitter.emit(im_oldChatEmbedding_const.EventType.dialog.open, {
-					dialogId: selectedItem.dialogId,
-					chat: this.$store.getters['dialogues/get'](selectedItem.dialogId, true),
-					user: this.$store.getters['users/get'](selectedItem.dialogId, true)
+					// dialogId: selectedItem.dialogId,
+					...data,
+					// chatType: selectedItem.entityId == 'im-chat' ? "chat" : "user",
+					// chat: store.getters['dialogues/get'](selectedItem.dialogId, true),
+					user: store.getters['users/get'](selectedItem.dialogId, true)
 				});
+
 				if (!nativeEvent.altKey) {
 					BX.MessengerProxy.clearSearchInput();
 				}
 			},
 			onPressEnterKey(event) {
-				if (event.data.keyCode !== 13)
-					// enter
-					{
-						return;
-					}
+				if (event.data.keyCode !== 13) // enter
+				{
+					return;
+				}
+
 				const firstItem = this.getFirstItemFromSearchResults();
+
 				if (!firstItem) {
 					return;
 				}
@@ -2145,12 +1734,13 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 				return null;
 			},
 			getCurrentUserId() {
-				return this.$store.state.application.common.userId;
+				let store = im_oldChatEmbedding_application_core.Core.getStore();
+				return store.state.application.common.userId;
 			}
 		},
 		template: `
-		<div class="bx-messenger-search" @scroll="onScroll">
-			<div>
+		<div class="bx-messenger-recent" @scroll="onScroll">
+			<div class="bx-messenger-recent-list w-100 h-100">
 				<template v-if="!showSearchResult">
 					<RecentUsersCarousel />
 					<SearchResultSection
@@ -2178,31 +1768,7 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 							:min-items:="5"
 							:max-items="20"
 						/>
-						<SearchResultSection 
-							v-if="result.departments.size > 0"
-							:component="itemDepartmentComponent"
-							:items="result.departments" 
-							:title="$Bitrix.Loc.getMessage('IM_SEARCH_SECTION_DEPARTMENTS')"
-							:min-items:="5"
-							:max-items="20"
-						/>
-						<SearchResultSection
-							v-if="result.openLines.size > 0"
-							:component="itemOpenlineComponent"
-							:items="result.openLines"
-							:title="$Bitrix.Loc.getMessage('IM_SEARCH_SECTION_OPENLINES')"
-							:min-items:="5"
-							:max-items="20"
-						/>
 						<template v-if="isNetworkAvailableForSearch">
-							<SearchResultSection
-								v-if="needToShowNetworkSection"
-								:component="itemNetworkComponent"
-								:items="result.network"
-								:title="$Bitrix.Loc.getMessage('IM_SEARCH_SECTION_NETWORK')"
-								:min-items:="5"
-								:max-items="20"
-							/>
 							<template v-if="!isNetworkButtonClicked">
 								<div 
 									v-if="!isNetworkLoading"
@@ -2235,8 +1801,10 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 
 })(
 	this.BX.Messenger.Embedding.ComponentLegacy = this.BX.Messenger.Embedding.ComponentLegacy || {}, window, BX, BX.Event,
-	BX.Messenger.Embedding.Const, BX.Messenger.Embedding.ComponentLegacy, BX.Messenger.Embedding.LibLegacy, BX.Messenger.Embedding.Lib, BX,
-	BX.Messenger.Embedding.Lib, BX.DexieExport,
+	BX.Messenger.Embedding.Const, BX.Messenger.Embedding.ComponentLegacy, BX.Messenger.Embedding.LibLegacy, BX.Messenger.Embedding.Lib,
+	BX,
+	BX.Messenger.Embedding.Lib,
+	BX.DexieExport,
 	BX.Messenger.Embedding.Application
 );
 //# sourceMappingURL=search.bundle.js.map

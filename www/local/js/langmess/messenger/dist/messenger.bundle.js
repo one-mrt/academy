@@ -160,7 +160,7 @@ this.BX.Messenger = this.BX.Messenger || {};
 							:enableEdit="true"
 							:enableCommand="false"
 							:enableMention="false"
-							:enableFile="true"
+							:enableFile="false"
 							:autoFocus="application.device.type !== DeviceType.mobile"
 						/>
 					</div>

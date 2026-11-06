@@ -269,217 +269,77 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 		// language=Vue
 		template: `
 		<div :data-id="item.dialogId" class="bx-im-recent-item-wrap">
-		<div v-if="!compactMode" :class="{'bx-im-recent-item-no-text': !showLastMessage, 'bx-im-recent-item-pinned': item.pinned}" class="bx-im-recent-item">
-			<div class="bx-im-recent-avatar-wrap">
-				<Avatar :dialogId="item.dialogId" :size="AvatarSize.L" :withTyping="true"/>
-			</div>
-			<div class="bx-im-recent-item-content">
-				<div class="bx-im-recent-item-content-header">
-					<ChatTitle :dialogId="item.dialogId" :withMute="true" />
-					<div class="bx-im-recent-date">
-						<div v-if="statusIcon" :class="'bx-im-recent-status-icon bx-im-recent-status-icon-' + statusIcon"></div>
-						{{ formattedDate }}
-					</div>
+			<div v-if="!compactMode" :class="{'bx-im-recent-item-no-text': !showLastMessage, 'bx-im-recent-item-pinned': item.pinned}" class="bx-im-recent-item">
+				<div class="bx-im-recent-avatar-wrap">
+					<Avatar :dialogId="item.dialogId" :size="AvatarSize.L" :withTyping="true"/>
 				</div>
-				<div class="bx-im-recent-item-content-bottom">
-					<div class="bx-im-recent-message-text-wrap">
-						<!-- Message text -->
-						<span class="bx-im-recent-message-text">
-							<template v-if="item.draft.text && dialog.counter === 0">
-								<span class="bx-im-recent-draft-prefix">{{ $Bitrix.Loc.getMessage('IM_RECENT_MESSAGE_DRAFT_2', {'#TEXT#': ''}) }}</span>
-								<span>{{ item.draft.text }}</span>
-							</template>
-							<template v-else-if="item.invitation.isActive">
-								<span class="bx-im-recent-message-text-invitation">{{ $Bitrix.Loc.getMessage('IM_RECENT_INVITATION_NOT_ACCEPTED') }}</span>
-							</template>
-							<template v-else-if="needsBirthdayPlaceholder">
-								{{ $Bitrix.Loc.getMessage('IM_RECENT_BIRTHDAY') }}
-							</template>
-							<template v-else-if="!showLastMessage">
-								{{ hiddenMessageText }}
-							</template>
-							<template v-else>
-								<span v-if="isLastMessageAuthor" class="bx-im-recent-last-message-author-icon-self"></span>
-								<template v-else-if="isChat && item.message.senderId">
-									<span v-if="lastMessageAuthorAvatar" :style="lastMessageAuthorAvatarStyle" class="bx-im-recent-last-message-author-icon-user"></span>
-									<span v-else class="bx-im-recent-last-message-author-icon-user bx-im-recent-last-message-author-icon-user-default"></span>
-								</template>
-								<span>{{ formattedMessageText }}</span>
-							</template>
-						</span>
-						<!-- End message text -->
+				<div class="bx-im-recent-item-content">
+					<div class="bx-im-recent-item-content-header">
+						<ChatTitle :dialogId="item.dialogId" :withMute="true" />
+						<div class="bx-im-recent-date">
+							<div v-if="statusIcon" :class="'bx-im-recent-status-icon bx-im-recent-status-icon-' + statusIcon"></div>
+							{{ formattedDate }}
+						</div>
 					</div>
-					<div :class="{'bx-im-recent-counter-static-wrap-extended': dialog.counter > 99}" class="bx-im-recent-counter-static-wrap">
-						<div v-if="item.unread || item.pinned || dialog.counter > 0" class="bx-im-recent-counter-wrap">
-							<div v-if="item.pinned && dialog.counter === 0 && !item.unread" class="bx-im-recent-pinned-icon"></div>
-							<div v-if="dialog.counter > 0 && !isSelfChat" :class="{'bx-im-recent-counter-muted': isChatMuted}" class="bx-im-recent-counter">
-								{{ formattedCounter }}
+					<div class="bx-im-recent-item-content-bottom">
+						<div class="bx-im-recent-message-text-wrap">
+							<!-- Message text -->
+							<span class="bx-im-recent-message-text">
+								<template v-if="item.draft.text && dialog.counter === 0">
+									<span class="bx-im-recent-draft-prefix">{{ $Bitrix.Loc.getMessage('IM_RECENT_MESSAGE_DRAFT_2', {'#TEXT#': ''}) }}</span>
+									<span>{{ item.draft.text }}</span>
+								</template>
+								<template v-else-if="item.invitation.isActive">
+									<span class="bx-im-recent-message-text-invitation">{{ $Bitrix.Loc.getMessage('IM_RECENT_INVITATION_NOT_ACCEPTED') }}</span>
+								</template>
+								<template v-else-if="needsBirthdayPlaceholder">
+									{{ $Bitrix.Loc.getMessage('IM_RECENT_BIRTHDAY') }}
+								</template>
+								<template v-else-if="!showLastMessage">
+									{{ hiddenMessageText }}
+								</template>
+								<template v-else>
+									<span v-if="isLastMessageAuthor" class="bx-im-recent-last-message-author-icon-self"></span>
+									<template v-else-if="isChat && item.message.senderId">
+										<span v-if="lastMessageAuthorAvatar" :style="lastMessageAuthorAvatarStyle" class="bx-im-recent-last-message-author-icon-user"></span>
+										<span v-else class="bx-im-recent-last-message-author-icon-user bx-im-recent-last-message-author-icon-user-default"></span>
+									</template>
+									<span>{{ formattedMessageText }}</span>
+								</template>
+							</span>
+							<!-- End message text -->
+						</div>
+						<div :class="{'bx-im-recent-counter-static-wrap-extended': dialog.counter > 99}" class="bx-im-recent-counter-static-wrap">
+							<div v-if="item.unread || item.pinned || dialog.counter > 0" class="bx-im-recent-counter-wrap">
+								<div v-if="item.pinned && dialog.counter === 0 && !item.unread" class="bx-im-recent-pinned-icon"></div>
+								<div v-if="dialog.counter > 0 && !isSelfChat" :class="{'bx-im-recent-counter-muted': isChatMuted}" class="bx-im-recent-counter">
+									{{ formattedCounter }}
+								</div>
+								<div v-else-if="item.unread" :class="{'bx-im-recent-counter-muted': isChatMuted}"  class="bx-im-recent-counter bx-im-recent-counter-unread"></div>
 							</div>
-							<div v-else-if="item.unread" :class="{'bx-im-recent-counter-muted': isChatMuted}"  class="bx-im-recent-counter bx-im-recent-counter-unread"></div>
 						</div>
 					</div>
 				</div>
 			</div>
-		</div>
-		<div v-if="compactMode" class="bx-im-recent-item" :class="{'bx-im-recent-item-pinned': item.pinned, 'bx-im-recent-item-no-counter': dialog.counter === 0}" ref="container">
-			<div class="bx-im-recent-avatar-wrap">
-				<Avatar
-					:dialogId="item.dialogId"
-					:size="AvatarSize.M"
-					:withStatus="false"
-					:withCounter="true"
-				/>
+			<div v-if="compactMode" class="bx-im-recent-item" :class="{'bx-im-recent-item-pinned': item.pinned, 'bx-im-recent-item-no-counter': dialog.counter === 0}" ref="container">
+				<div class="bx-im-recent-avatar-wrap">
+					<Avatar
+						:dialogId="item.dialogId"
+						:size="AvatarSize.M"
+						:withStatus="false"
+						:withCounter="true"
+					/>
+				</div>
+				<template v-if="showNewUserPopup">
+					<Teleport :to="newUserPopupContainer">
+						<NewUserPopup :title="dialog.name" :text="$Bitrix.Loc.getMessage('IM_RECENT_NEW_USER_POPUP_TEXT')" @click="onNewUserPopupClick" @close="onNewUserPopupClose"/>
+					</Teleport>
+				</template>
 			</div>
-			<template v-if="showNewUserPopup">
-				<Teleport :to="newUserPopupContainer">
-					<NewUserPopup :title="dialog.name" :text="$Bitrix.Loc.getMessage('IM_RECENT_NEW_USER_POPUP_TEXT')" @click="onNewUserPopupClick" @close="onNewUserPopupClose"/>
-				</Teleport>
-			</template>
-		</div>
 		</div>
 	`
 	};
 
-	// @vue/component
-	const ActiveCall = {
-		name: 'ActiveCall',
-		components: {
-			Avatar: im_oldChatEmbedding_component_elements.Avatar
-		},
-		props: {
-			item: {
-				type: Object,
-				required: true
-			},
-			compactMode: {
-				type: Boolean,
-				default: false
-			}
-		},
-		emits: ['click', 'contextmenu'],
-		computed: {
-			RecentCallStatus: () => im_oldChatEmbedding_const.RecentCallStatus,
-			AvatarSize: () => im_oldChatEmbedding_component_elements.AvatarSize,
-			chatData() {
-				return this.item.call.associatedEntity;
-			},
-			isUser() {
-				return this.chatData.advanced.chatType === im_oldChatEmbedding_const.DialogType.private;
-			},
-			isTabWithActiveCall() {
-				return false;
-			},
-			avatarStyle() {
-				return {
-					backgroundImage: `url(${this.chatData.avatar})`
-				};
-			},
-			avatarText() {
-				return im_oldChatEmbedding_lib_utils.Utils.text.getFirstLetters(this.item.name);
-			},
-			isDarkTheme() {
-				return this.application.options.darkTheme;
-			},
-			formattedName() {
-				return im_oldChatEmbedding_lib_utils.Utils.text.htmlspecialcharsback(this.item.name);
-			},
-			...ui_vue3_vuex.mapState({
-				application: state => state.application
-			})
-		},
-		methods: {
-			onJoinClick(event) {},
-			onHangupClick() {},
-			onClick(event) {
-				const item = this.$store.getters['recent/get'](this.item.dialogId);
-				if (!item) {
-					return;
-				}
-				this.$emit('click', {
-					item,
-					$event: event
-				});
-			},
-			onRightClick() {
-				const item = this.$store.getters['recent/get'](this.item.dialogId);
-				if (!item) {
-					return;
-				}
-				this.$emit('contextmenu', {
-					item,
-					$event: event
-				});
-			}
-		},
-		template: `
-		<div :data-id="item.dialogId" class="bx-im-recent-item-wrap">
-		<div v-if="!compactMode" @click="onClick" @click.right.prevent="onRightClick" class="bx-im-recent-item bx-im-recent-active-call-item">
-			<div class="bx-im-recent-avatar-wrap">
-				<Avatar :dialogId="item.dialogId" :size="AvatarSize.L" />
-			</div>
-			<div class="bx-im-recent-item-content">
-				<!-- Waiting status -->
-				<template v-if="item.state === RecentCallStatus.waiting">
-					<!-- 1-on-1 -->
-					<div v-if="isUser"  class="bx-im-recent-active-call-waiting-content">
-						<div class="bx-im-recent-active-call-icon bx-im-recent-active-call-waiting-icon"></div>
-						<div class="bx-im-recent-active-call-waiting-title">
-							{{ formattedName }}
-						</div>
-					</div>
-					<!-- Chat -->
-					<div v-else>
-						<div class="bx-im-recent-item-content-header">
-							<div class="bx-im-recent-active-call-icon bx-im-recent-active-call-waiting-icon"></div>
-							<span class="bx-im-recent-active-call-waiting-title" :title="formattedName">
-								{{ formattedName }}
-							</span>
-						</div>
-						<div class="bx-im-recent-item-content-bottom">
-							<div @click.stop="onJoinClick" class="bx-im-recent-active-call-button bx-im-recent-active-call-join-button">
-								{{ $Bitrix.Loc.getMessage('IM_RECENT_ACTIVE_CALL_JOIN') }}
-							</div>
-						</div>
-					</div>
-				</template>
-				<!-- Joined status -->
-				<template v-else-if="item.state === RecentCallStatus.joined">
-					<!-- 1-on-1 -->
-					<div v-if="isUser || !isTabWithActiveCall" class="bx-im-recent-active-call-joined-content">
-						<div class="bx-im-recent-active-call-icon bx-im-recent-active-call-joined-icon"></div>
-						<div class="bx-im-recent-active-call-joined-title">
-							{{ formattedName }}
-						</div>
-					</div>
-					<!-- Chat -->
-					<div v-else-if="!isUser && isTabWithActiveCall">
-						<div class="bx-im-recent-item-content-header">
-							<div class="bx-im-recent-active-call-icon bx-im-recent-active-call-joined-icon"></div>
-							<span class="bx-im-recent-active-call-joined-title" :title="formattedName">
-								{{ formattedName }}
-							</span>
-						</div>
-						<div class="bx-im-recent-item-content-bottom">
-							<div @click.stop="onHangupClick" class="bx-im-recent-active-call-button bx-im-recent-active-call-hangup-button">
-								{{ $Bitrix.Loc.getMessage('IM_RECENT_ACTIVE_CALL_HANGUP') }}
-							</div>
-						</div>
-					</div>
-				</template>
-			</div>
-		</div>
-		<div v-if="compactMode" @click="onClick" @click.right.prevent="onRightClick" class="bx-im-recent-item bx-im-recent-active-call-item">
-			<div class="bx-im-recent-avatar-wrap">
-				<Avatar :dialogId="item.dialogId" :size="AvatarSize.M" />
-				<div class="bx-im-recent-active-call-compact-icon-container">
-					<div v-if="item.state === RecentCallStatus.waiting" class="bx-im-recent-active-call-icon bx-im-recent-active-call-waiting-icon"></div>
-					<div v-else-if="item.state === RecentCallStatus.joined" class="bx-im-recent-active-call-icon bx-im-recent-active-call-joined-icon"></div>
-				</div>
-			</div>
-		</div>
-		</div>
-	`
-	};
 
 	class SettingsManager {
 		static instance = null;
@@ -590,60 +450,6 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 				type: BroadcastManager.events.recentListUpdate,
 				data: recentData
 			});
-		}
-	}
-
-	class CallManager {
-		static instance = null;
-		store = null;
-		static init($Bitrix) {
-			if (this.instance) {
-				return;
-			}
-			this.instance = new this($Bitrix);
-		}
-		constructor($Bitrix) {
-			this.store = $Bitrix.Data.get('controller').store;
-			this.onCallCreatedHandler = this.onCallCreated.bind(this);
-			main_core_events.EventEmitter.subscribe('CallEvents::callCreated', this.onCallCreatedHandler);
-		}
-		onCallCreated(event) {
-			const {
-				call
-			} = event.getData()[0];
-			call.addEventListener(BX.Call.Event.onJoin, this.onCallJoin.bind(this));
-			call.addEventListener(BX.Call.Event.onLeave, this.onCallLeave.bind(this));
-			call.addEventListener(BX.Call.Event.onDestroy, this.onCallDestroy.bind(this));
-			this.store.dispatch('recent/addActiveCall', {
-				dialogId: call.associatedEntity.id,
-				name: call.associatedEntity.name,
-				call: call,
-				state: im_oldChatEmbedding_const.RecentCallStatus.waiting
-			});
-		}
-		onCallJoin(event) {
-			this.store.dispatch('recent/updateActiveCall', {
-				dialogId: event.call.associatedEntity.id,
-				fields: {
-					state: im_oldChatEmbedding_const.RecentCallStatus.joined
-				}
-			});
-		}
-		onCallLeave(event) {
-			this.store.dispatch('recent/updateActiveCall', {
-				dialogId: event.call.associatedEntity.id,
-				fields: {
-					state: im_oldChatEmbedding_const.RecentCallStatus.waiting
-				}
-			});
-		}
-		onCallDestroy(event) {
-			this.store.dispatch('recent/deleteActiveCall', {
-				dialogId: event.call.associatedEntity.id
-			});
-		}
-		destroy() {
-			main_core_events.EventEmitter.unsubscribe(window, 'CallEvents::callCreated', this.onCallCreatedHandler);
 		}
 	}
 
@@ -841,8 +647,7 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 		name: 'RecentList',
 		components: {
 			LoadingState: im_oldChatEmbedding_component_elements.RecentLoadingState,
-			RecentItem,
-			ActiveCall
+			RecentItem
 		},
 		directives: {
 			'recent-list-observer': {
@@ -918,14 +723,12 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 				return 'bx-messenger-recent-transition';
 			},
 			...ui_vue3_vuex.mapState({
-				activeCalls: state => state.recent.activeCalls,
 				application: state => state.application
 			})
 		},
 		created() {
 			this.recentService = im_oldChatEmbedding_provider_service.RecentService.getInstance();
 			this.contextMenuManager = new im_oldChatEmbedding_lib_menu.RecentMenu(this.$Bitrix);
-			CallManager.init(this.$Bitrix);
 			EventHandler.init(this.$Bitrix);
 			SettingsManager.init(this.$Bitrix);
 			this.initBroadcastManager();
@@ -1060,14 +863,6 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 		template: `
 		<div @scroll="onScroll" class="bx-messenger-recent-list" :class="{'bx-messenger-recent-compact': compactMode}" >
 			<transition-group :name="transitionType">
-				<ActiveCall
-					v-for="activeCall in activeCalls"
-					:key="'call-' + activeCall.dialogId"
-					:item="activeCall"
-					:compactMode="compactMode"
-					@click="onCallClick"
-					@click.right="onCallRightClick"
-				/>
 				<template v-for="section in sections">
 					<RecentItem
 						v-for="item in section"

@@ -143,26 +143,6 @@ if(!empty($user->getId())):?>
     <?$APPLICATION->IncludeComponent(
         "lang:messenger",
         "lang.mess",
-        Array(
-            // "DESIGN" => "DESKTOP",
-            // "CONTEXT" => "POPUP-FULLSCREEN"
-        )
+        []
     );?>
-
-    <?
-    // echo '<pre>';
-    // print_r(\Bitrix\Im\V2\Permission\Filter::getRoleGetListFilter($ormParams, \Bitrix\Im\V2\Permission\ActionGroup::ManageMessages, 'RELATION', 'CHAT'));
-    // echo '</pre>';
-    ?>
-    <?/*<script>
-        BX.addCustomEvent("onImConfirmNotify", function(data) {
-            console.info(data)
-        });
-        BX.addCustomEvent(window, "onImConfirmNotify", function(data) {
-            console.info(data)
-        });
-        BX.addCustomEvent(window, "bxImClickConfirmNotify", function(data) {
-            console.info(data)
-        });
-    </script>*/?>
 <?endif;?>

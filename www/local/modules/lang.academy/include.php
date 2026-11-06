@@ -13,6 +13,8 @@ Loader::registerAutoLoadClasses(
         "Lang\Academy\Rating" => "lib/academy/rating.php",
         "Lang\Academy\Offer" => "lib/academy/offer.php",
         "Lang\Academy\Order" => "lib/academy/order.php",
+        "Lang\Academy\UsersChatProvider" => "lib/academy/usersChatProvider.php",
+        "Lang\Academy\ImUsersFilter" => "lib/academy/imUsersFilter.php",
     ]
 );
 ?>

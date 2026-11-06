@@ -41,7 +41,7 @@ $user = UserTable::getList([
 ])->fetchObject();
 ?>
 
-<script>LG.ExpertData = {userId: <?=$user->getId()?>}</script>
+<script>LG.ExpertData={userId:<?=$user->getId()?>}</script>
 <div class="w-100 d-f fd-c rg-32 pn-r">
 
     <div class="w-100 d-f fd-c rg-24 xl:rg-32 fg-1">

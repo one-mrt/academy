@@ -48,7 +48,9 @@ class LangOrder extends CBitrixComponent
         $this->arResult['userId'] = $this->user->getId();
     }
 
-    public function onPrepareComponentParams($arParam){return $arParam;}
+    public function onPrepareComponentParams($arParam){
+        return $arParam;
+    }
 
     private function getSelectList(string $key, string $apiCode)
     {

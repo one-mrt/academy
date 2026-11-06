@@ -449,6 +449,20 @@ class Messages {
         return \CIMNotify::Add($param);
     }
 
+    public static function statusPayNotifyCustomer(array $param)
+    {
+        $serverName = self::getSite();
+        $param = [
+            "TO_USER_ID" => $param['toUser'],
+            "NOTIFY_TYPE" => IM_NOTIFY_SYSTEM,
+            "NOTIFY_MODULE" => "im",
+            "NOTIFY_TAG" => "order|system|status|pay|{$param['orderId']}|{$param['status']}",
+            'NOTIFY_MESSAGE' => "Статус заказа [url={$serverName}{$param['orderUrl']}]№{$param['orderId']}[/url] изменился на [color=#c90536][b]«{$param['status']}»[/b][/color]. Пора оплатить заказ!"
+        ];
+
+        return \CIMNotify::Add($param);
+    }
+
     public static function addNewOfferOrder(array $param)
     {
         $serverName = self::getSite();

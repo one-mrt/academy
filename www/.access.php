@@ -1,4 +1,5 @@
 <?
+$PERM["video"]["*"]="R";
 $PERM["local"]["13"]="R";
 $PERM["local"]["14"]="R";
 $PERM["bitrix"]["13"]="R";
@@ -14,5 +15,4 @@ $PERM["lk"]["G11"]="D";
 $PERM["lk"]["G6"]="R";
 $PERM["lk"]["G5"]="R";
 $PERM["guest"]["*"]="R";
-$PERM["video"]["*"]="R";
 ?>

@@ -316,8 +316,6 @@ function GetTemplateJS($arParams, $arTemplate)
 
 	return $sJS;
 }
-
-// echo '<pre>', print_r(CIMChat::GetChatOptions(), 1), '</pre>';
 ?>
 
 <style>
@@ -353,28 +351,16 @@ function GetTemplateJS($arParams, $arTemplate)
 <script>
 	BX.IM.prototype.initLeftPanelApp = function()
 	{
-		if (this.leftPanelAppLaunched)
-		{
+		if (this.leftPanelAppLaunched) {
 			return Promise.resolve();
 		}
 
 		var applicationConfig = {};
-		if (BX.MessengerCommon.isDesktop())
-		{
-			applicationConfig.preloadedList = this.newRecent;
-			applicationConfig.chatOptions = this.userChatOptions;
-		}
 
 		applicationConfig.layout = this.options.v2layout === true
 			? BX.Messenger.Embedding.Const.ApplicationLayout.lines
 			: BX.Messenger.Embedding.Const.ApplicationLayout.full
 		;
-
-		// return BX.Messenger.Application.Launch('recent', applicationConfig).then(function(application) {
-		// 	// console.info(application.template)
-		// 	this.leftpanelApp = application;
-		// 	this.leftPanelAppLaunched = true;
-		// }.bind(this))
 	};
 </script>
 
@@ -442,28 +428,36 @@ function GetTemplateJS($arParams, $arTemplate)
 	};
 
 	MessengerProxy.prototype.addChatData = function(data) {
-		var dialogId = data.id;
+		var dialogId = `${data.id}`;
+
+		if(data.entityId == "im-chat" || data.chatType == 'chat') {
+			if(Number(data.id) > 0) {
+				dialogId = `chat${data.id}`
+			}
+		}
+
 		var isChat = dialogId.startsWith('chat');
 
 		if (isChat && !this.BXIM.messenger.chat[dialogId.substring(4)])
 		{
 			var cutDialogId = dialogId.substring(4);
-			var chat = data.item;
+			var chat = data;
 
 			this.BXIM.messenger.chat[cutDialogId] = {
-				avatar: chat.avatar,
-				color: chat.color,
-				id: chat.id,
-				name: BX.util.htmlspecialchars(chat.title.value),
-				type: chat.type,
-				entity_id: chat.entity_id,
-				entity_data_1: chat.entity_data_1,
-				entity_data_2: chat.entity_data_2,
+				avatar: data.avatar,
+				color: data.color,
+				id: data.id,
+				name: BX.util.htmlspecialchars(data.name),
+				type: data.type,
+				entity_id: data.entity_id,
+				entity_data_1: data.entity_data_1,
+				entity_data_2: data.entity_data_2,
 			};
 		}
 		else if (!isChat && !this.BXIM.messenger.users[dialogId])
 		{
 			var user = data.user;
+
 			this.BXIM.messenger.users[dialogId] = {
 				id: dialogId,
 				first_name: BX.util.htmlspecialchars(user.firstName),
@@ -472,8 +466,8 @@ function GetTemplateJS($arParams, $arTemplate)
 				gender: user.gender,
 				status: user.status,
 				work_position: BX.util.htmlspecialchars(user.workPosition),
-				avatar: data.chat.avatar,
-				color: data.chat.color,
+				avatar: data.avatar,
+				color: data.color,
 				bot: user.bot,
 				absent: user.absent,
 				extranet: user.extranet,

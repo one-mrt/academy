@@ -13,7 +13,7 @@ LG.userPanel = class
     containerMessendger
     contentMessendger
     closeMessenger
-    eventNotify = ['notifyAdd', 'notifyReadList', 'notifyReadAll', 'counterGet', 'notifyDelete']
+    eventNotify = ['notifyAdd', 'notifyDelete', 'notifyRead', 'notifyUnread', 'notifyReadList', 'notifyReadAll', 'counterGet']
     eventMessage = ['messageUpdate']
 
     constructor() {
@@ -69,6 +69,8 @@ LG.userPanel = class
         setTimeout(() => {
             this.wrapMessendger.classList.add('d-n')
             document.body.classList.remove('of-h')
+            this.dialog.classList.remove('z-3')
+            this.notify.classList.remove('z-3')
         }, 500)
     }
 
@@ -78,9 +80,11 @@ LG.userPanel = class
 
         if(!this.isOpenMessenger()) {
             BXIM.openMessenger()
+            this.dialog.classList.add('z-3')
         } else if(this.isOpenMessenger() && BXIM.isOpenNotify()) {
 
         } else {
+            this.dialog.classList.remove('z-3')
             BXIM.closeMessenger()
         }
 
@@ -97,29 +101,32 @@ LG.userPanel = class
             BXIM.openNotify()
             BXIM.messenger.popupMessengerDialog.classList.remove('rt-0')
             BXIM.messenger.popupMessengerExtra.classList.add('rt-0')
+            this.notify.classList.add('z-3')
         } else if(BXIM.isOpenNotify() && !this.isOpenMessenger()) {
             BXIM.openMessenger()
             BXIM.messenger.popupMessengerDialog.classList.remove('rt-0')
             BXIM.messenger.popupMessengerExtra.classList.add('rt-0')
+            this.notify.classList.add('z-3')
         } else if(!BXIM.isOpenNotify() && this.isOpenMessenger()) {
             BXIM.openNotify()
             BXIM.messenger.popupMessengerDialog.classList.remove('rt-0')
             BXIM.messenger.popupMessengerExtra.classList.add('rt-0')
+            this.notify.classList.add('z-3')
         } else {
             BXIM.closeNotify()
             BXIM.closeMessenger()
             BXIM.messenger.popupMessengerDialog.classList.remove('rt-0')
             BXIM.messenger.popupMessengerExtra.classList.remove('rt-0')
+            this.notify.classList.remove('z-3')
         }
     }
 
     initNotifyEvent() {
-        BX.addCustomEvent(window, "onImInitBefore", BX.proxy(this.initIm, this));
+        BX.addCustomEvent(window, "onImInitBefore", BX.proxy(this.initIm, this))
     }
 
     initIm(im) {
         this.im = BX.IM
-        BX.addCustomEvent(window, "onImUpdateCounterNotify", BX.proxy(this.updateCounter, this));
         BX.addCustomEvent(window, "onImUpdateCounterMessage", BX.proxy(this.updateCounter, this));
 
         for(let k = 0; k < this.eventNotify.length; k++) {
@@ -127,33 +134,56 @@ LG.userPanel = class
                 moduleId: 'im',
                 command: this.eventNotify[k],
                 callback: (data) => {
-                    // console.log(this.eventNotify[k], data)
                     this.updateCounter(data.counter, 'NOTIFY')
                 }
             });
         }
     }
 
+    notifyCounter(command, params, extra) {
+        switch(command) {
+            case 'notifyAdd':
+            case 'notifyDelete':
+            case 'notifyRead':
+            case 'notifyUnread':
+            case 'notifyReadList':
+            case 'notifyReadAll':
+                this.updateCounter(params, 'NOTIFY')
+                break;
+        }
+    }
+
     updateIndicator(count, type) {
-        let messageCountLabel = '';
+        let messageCountLabel = '0';
 
         if (count > 99) {
             messageCountLabel = '99+';
-        } else if (count > 0) {
+        } else if (count >= 0) {
             messageCountLabel = count;
         }
 
-        if(count > 0) {
+        if(count >= 0) {
             switch(type) {
                 case "MESSAGE":
-                    this.dialogCount.classList.remove('bc-000')
-                    this.dialogCount.classList.add('bc-c90536')
+                    if(count > 0) {
+                        this.dialogCount.classList.remove('bc-000')
+                        this.dialogCount.classList.add('bc-c90536')
+                    } else {
+                        this.dialogCount.classList.add('bc-000')
+                        this.dialogCount.classList.remove('bc-c90536')
+                    }
+
                     this.dialogCount.innerText = messageCountLabel
                     break;
                 case "NOTIFY":
-                    // console.info(count, type)
-                    this.notifyCount.classList.remove('bc-000')
-                    this.notifyCount.classList.add('bc-c90536')
+                    if(count > 0) {
+                        this.notifyCount.classList.remove('bc-000')
+                        this.notifyCount.classList.add('bc-c90536')
+                    } else {
+                        this.notifyCount.classList.add('bc-000')
+                        this.notifyCount.classList.remove('bc-c90536')
+                    }
+
                     this.notifyCount.innerText = messageCountLabel
                     break;
             }
@@ -163,7 +193,6 @@ LG.userPanel = class
     updateCounter(count, type) {
         if (type == 'MESSAGE') {
             this.im.messageCount = count;
-            // this.dialogCount.innerText = count
             this.updateIndicator(count, type)
         } else if (type == 'NOTIFY') {
             this.im.notifyCount = count;
@@ -172,6 +201,7 @@ LG.userPanel = class
             this.im.mailCount = count;
 
         var sumCount = 0;
+
         if (this.im.notifyCount > 0)
             sumCount += parseInt(this.im.notifyCount);
         if (this.im.messageCount > 0)
@@ -179,33 +209,12 @@ LG.userPanel = class
         if (this.im.linesCount > 0)
             sumCount += parseInt(this.im.linesCount);
 
-        if (BX.MessengerCommon.isPage())
-        {
-            var sumLabel = '';
-            if (sumCount > 0)
-                sumLabel = sumCount;
-
-            var iconTitle = BX.message('IM_DESKTOP_UNREAD_EMPTY');
-            if (this.im.notifyCount > 0 && this.im.messageCount+this.im.linesCount > 0)
-                iconTitle = BX.message('IM_DESKTOP_UNREAD_MESSAGES_NOTIFY');
-            else if (this.im.notifyCount > 0)
-                iconTitle = BX.message('IM_DESKTOP_UNREAD_NOTIFY');
-            else if (this.im.messageCount+this.im.linesCount > 0)
-                iconTitle = BX.message('IM_DESKTOP_UNREAD_MESSAGES');
-            else if (this.im.notify != null && this.im.notify.getCounter('**') > 0)
-                iconTitle = BX.message('IM_DESKTOP_UNREAD_LF_2');
-
-            if (BX.MessengerCommon.isDesktop())
-            {
-                BX.desktop.setIconTooltip(iconTitle);
-                BX.desktop.setIconBadge(sumLabel, this.im.messageCount+this.im.linesCount > 0);
-            }
-        }
         if (BX.MessengerCommon.isPage() && this.im.notify && !this.im.userExtranet)
         {
             var lfCounter = this.im.notify.getCounter('**');
             BX.MessengerWindow.setTabBadge('im-lf', lfCounter);
         }
+
         BX.onCustomEvent(window, 'onImUpdateSumCounters', [sumCount, 'SUM']);
 
         if (!this.im.desktopStatus && !BX.MessengerCommon.isDesktop())
@@ -224,16 +233,6 @@ LG.userPanel = class
                 document.title = '('+sumCount+') '+document.title;
             }
         }
-
-        // console.info('notify')
-
-        // if (BXIM.notify.panelButtonMessage)
-        // {
-        //     if (BXIM.messageCount > 0)
-        //         BX.addClass(BXIM.notify.panelButtonMessage, 'bx-notifier-message-new');
-        //     else
-        //         BX.removeClass(BXIM.notify.panelButtonMessage, 'bx-notifier-message-new');
-        // }
     }
 
     toggle() {

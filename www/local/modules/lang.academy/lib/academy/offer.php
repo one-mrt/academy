@@ -53,16 +53,17 @@ class Offer
         $this->param = $param;
         $this->initObjectVar();
 
-        Util::langWriteLog([$this->orderId, $this->offerId, $this->action, $this->actionValue]);
+        // Util::langWriteLog([$this->orderId, $this->offerId, $this->action, $this->actionValue]);
 
         if($this->isOffer()) {
             $this->orderUrl = Data::getDetailPageUrlApiCode($this->langServiceOrder, $this->service);
             $this->chatId = intval($this->service->getChat()?->getValue());
             $this->serviceId = intval($this->service->getId());
             $this->private = $this->service->getPrivate()?->getValue();
-            $this->answer = intval($this->offer->getUsr()?->getValue());
             $this->answerSelected = intval($this->service->getUex()?->getValue());
             $this->customer = intval($this->service->getCreatedBy());
+
+            $this->answer = intval($this->offer->getUsr()?->getValue());
             $this->offerSum = intval($this->offer->getSum()?->getValue());
 
             switch($this->action) {
@@ -77,21 +78,32 @@ class Offer
                     if($this->actionValue == 'Y') {
                         $this->acceptConfirm();
                     } elseif($this->actionValue == 'N') {
-                        // $this->cancelCustomer();
                         $this->cancelConfirm();
                     }
                     break;
-                case "private":
-                    if($this->actionValue == 'N') {
-                        $this->privateCancel();
-                    }
-                    break;
+                // case "private":
+                //     if($this->actionValue == 'N') {
+                //         $this->privateCancel();
+                //     }
+                //     break;
                 case "withdraw":
                     if($this->actionValue == 'Y') {
                         $this->withdrawAnswer();
                     }
                     break;
             }
+        } elseif(!empty($this->service) && $this->action == "private" && $this->actionValue == 'N') {
+            $this->orderUrl = Data::getDetailPageUrlApiCode($this->langServiceOrder, $this->service);
+            $this->chatId = intval($this->service->getChat()?->getValue());
+            $this->serviceId = intval($this->service->getId());
+            $this->private = $this->service->getPrivate()?->getValue();
+            $this->answerSelected = intval($this->service->getUex()?->getValue());
+            $this->customer = intval($this->service->getCreatedBy());
+            $this->answer = intval($this->service->getUex()?->getValue());
+            
+            // if($this->action == "private" && $this->actionValue == 'N') {
+                $this->privateCancel();
+            // }
         }
     }
 
@@ -335,8 +347,8 @@ class Offer
             'cache' => Data::getCache()
         ])->fetchObject();
 
-        Messages::statusDefaultNotifyManager([
-            'toUser' => $this->answer,
+        Messages::statusPayNotifyCustomer([
+            'toUser' => $this->customer,
             'status' => $status->getName(),
             'orderUrl' => "/lk{$this->orderUrl}",
             'orderId' => $this->orderId,
@@ -358,6 +370,7 @@ class Offer
             'fromUser' => $this->customer,
             'orderId' => $this->orderId,
             'url' => $this->orderUrl,
+            'serviceId' => $this->serviceId
         ];
 
         $this->offer
@@ -370,12 +383,14 @@ class Offer
             ->setSelect(['ID', 'msg.VALUE', 'usr.VALUE'])
             ->where('ofr.VALUE', $this->serviceId)
             ->where('ID', '!=', $this->offerId)
+            ->where('ACTIVE', 'Y')
             ->fetchCollection()
             ->walk(static function($offer) use (&$param): void {
                 NotifyMessage::Delete(intval($offer->getMsg()?->getValue()));
 
                 if(intval($offer->getUsr()->getValue()) > 0) {
                     $param['toUser'] = intval($offer->getUsr()->getValue());
+                    $param['offerId'] = intval($offer->getId());
                     Messages::cancelAnswerOrderAll($param);
                 }
 

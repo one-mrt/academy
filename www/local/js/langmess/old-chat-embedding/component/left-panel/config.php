@@ -6,10 +6,9 @@ if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true)
 
 return [
 	'js' => 'dist/left-panel.bundle.js',
+	'css' => 'dist/left-panel.bundle.css',
 	'rel' => [
 		'main.polyfill.core',
-		// 'langmess.old-chat-embedding.component.recent-list',
-		'langmess.component.recent',
 		'langmess.old-chat-embedding.component.search',
 		'im.old-chat-embedding.const',
 		'im.const',

@@ -1352,72 +1352,72 @@ else if (isImPostRequest('IM_NOTIFY_GROUP_REMOVE'))
 }
 else if (isImPostRequest('IM_RECENT_HIDE'))
 {
-	\CIMContactList::DialogHide($_POST['DIALOG_ID']);
+	// \CIMContactList::DialogHide($_POST['DIALOG_ID']);
 
-	echo \Bitrix\Im\Common::objectEncode(Array(
-		'USER_ID' => $_POST['DIALOG_ID'],
-		'ERROR' => ''
-	));
+	// echo \Bitrix\Im\Common::objectEncode(Array(
+	// 	'USER_ID' => $_POST['DIALOG_ID'],
+	// 	'ERROR' => ''
+	// ));
 }
 else if (isImPostRequest('IM_CHAT_ADD'))
 {
-	$_POST['USERS'] = CUtil::JsObjectToPhp($_POST['USERS']);
+	// $_POST['USERS'] = CUtil::JsObjectToPhp($_POST['USERS']);
 
-	$errorMessage = "";
-	$chatId = 0;
-	$alias = null;
-	if ($_POST['TYPE'] != 'open' && !is_array($_POST['USERS']))
-	{
-		$errorMessage = GetMessage('IM_UNKNOWN_ERROR');
-	}
-	else
-	{
-		$entityType = '';
+	// $errorMessage = "";
+	// $chatId = 0;
+	// $alias = null;
+	// if ($_POST['TYPE'] != 'open' && !is_array($_POST['USERS']))
+	// {
+	// 	$errorMessage = GetMessage('IM_UNKNOWN_ERROR');
+	// }
+	// else
+	// {
+	// 	$entityType = '';
 
-		$type = IM_MESSAGE_CHAT;
-		if ($_POST['TYPE'] == 'open')
-		{
-			$type = IM_MESSAGE_OPEN;
-		}
-		else if ($_POST['TYPE'] == 'videoconf')
-		{
-			$entityType = 'VIDEOCONF';
-		}
+	// 	$type = IM_MESSAGE_CHAT;
+	// 	if ($_POST['TYPE'] == 'open')
+	// 	{
+	// 		$type = IM_MESSAGE_OPEN;
+	// 	}
+	// 	else if ($_POST['TYPE'] == 'videoconf')
+	// 	{
+	// 		$entityType = 'VIDEOCONF';
+	// 	}
 
-		if (\Bitrix\Im\User::getInstance()->isExtranet())
-		{
-			$_POST['USERS'] = \Bitrix\Im\Integration\Socialnetwork\Extranet::filterUserList($_POST['USERS']);
-		}
+	// 	if (\Bitrix\Im\User::getInstance()->isExtranet())
+	// 	{
+	// 		$_POST['USERS'] = \Bitrix\Im\Integration\Socialnetwork\Extranet::filterUserList($_POST['USERS']);
+	// 	}
 
-		$CIMChat = new CIMChat();
-		$chatId = $CIMChat->Add(Array(
-			'TYPE' => $type,
-			'USERS' => $_POST['USERS'],
-			'TITLE' => $_POST['TITLE'],
-			'MESSAGE' => $_POST['MESSAGE'],
-			'ENTITY_TYPE' => $entityType,
-			'SEARCH_MARK' => $_POST['SEARCH_MARK'] ?? null,
-			'AVATAR' => $_POST['AVATAR']
-		));
-		if ($chatId)
-		{
-			if ($entityType === 'VIDEOCONF')
-			{
-				$alias = \Bitrix\Im\Alias::getByEntity('VIDEOCONF', $chatId);
-			}
-		}
-		else
-		{
-			if ($e = $GLOBALS["APPLICATION"]->GetException())
-				$errorMessage = $e->GetString();
-		}
-	}
+	// 	$CIMChat = new CIMChat();
+	// 	$chatId = $CIMChat->Add(Array(
+	// 		'TYPE' => $type,
+	// 		'USERS' => $_POST['USERS'],
+	// 		'TITLE' => $_POST['TITLE'],
+	// 		'MESSAGE' => $_POST['MESSAGE'],
+	// 		'ENTITY_TYPE' => $entityType,
+	// 		'SEARCH_MARK' => $_POST['SEARCH_MARK'] ?? null,
+	// 		'AVATAR' => $_POST['AVATAR']
+	// 	));
+	// 	if ($chatId)
+	// 	{
+	// 		if ($entityType === 'VIDEOCONF')
+	// 		{
+	// 			$alias = \Bitrix\Im\Alias::getByEntity('VIDEOCONF', $chatId);
+	// 		}
+	// 	}
+	// 	else
+	// 	{
+	// 		if ($e = $GLOBALS["APPLICATION"]->GetException())
+	// 			$errorMessage = $e->GetString();
+	// 	}
+	// }
 
-	echo \Bitrix\Im\Common::objectEncode([
-		'CHAT_ID' => intval($chatId),
-		'PUBLIC_LINK' => $alias? $alias['LINK']: '',
-		'ERROR' => $errorMessage
-	]);
+	// echo \Bitrix\Im\Common::objectEncode([
+	// 	'CHAT_ID' => intval($chatId),
+	// 	'PUBLIC_LINK' => $alias? $alias['LINK']: '',
+	// 	'ERROR' => $errorMessage
+	// ]);
 }
 else if (isImPostRequest('IM_CHAT_EXTEND'))
 {
@@ -1461,23 +1461,23 @@ else if (isImPostRequest('IM_PARENT_CHAT_JOIN'))
 }
 else if (isImPostRequest('IM_CHAT_LEAVE'))
 {
-	$userId = $USER->GetId();
-	$chatId = intval($_POST['CHAT_ID']);
-	if (!\Bitrix\Im\Chat::isActionAllowed('chat' . $chatId, 'LEAVE'))
-	{
-		$result = false;
-	}
-	else
-	{
-		$CIMChat = new CIMChat();
-		$result = $CIMChat->DeleteUser($chatId, intval($_POST['USER_ID']) > 0? intval($_POST['USER_ID']): $USER->GetID());
-	}
+	// $userId = $USER->GetId();
+	// $chatId = intval($_POST['CHAT_ID']);
+	// if (!\Bitrix\Im\Chat::isActionAllowed('chat' . $chatId, 'LEAVE'))
+	// {
+	// 	$result = false;
+	// }
+	// else
+	// {
+	// 	$CIMChat = new CIMChat();
+	// 	$result = $CIMChat->DeleteUser($chatId, intval($_POST['USER_ID']) > 0? intval($_POST['USER_ID']): $USER->GetID());
+	// }
 
-	echo \Bitrix\Im\Common::objectEncode(Array(
-		'CHAT_ID' => intval($_POST['CHAT_ID']),
-		'USER_ID' => intval($_POST['USER_ID']),
-		'ERROR' => $result? '': 'ACCESS_ERROR'
-	));
+	// echo \Bitrix\Im\Common::objectEncode(Array(
+	// 	'CHAT_ID' => intval($_POST['CHAT_ID']),
+	// 	'USER_ID' => intval($_POST['USER_ID']),
+	// 	'ERROR' => $result? '': 'ACCESS_ERROR'
+	// ));
 }
 else if (isImPostRequest('IM_CHAT_MUTE'))
 {
@@ -1496,24 +1496,24 @@ else if (isImPostRequest('IM_CHAT_MUTE'))
 }
 else if (isImPostRequest('IM_CHAT_RENAME'))
 {
-	$userId = $USER->GetId();
-	$chatId = intval($_POST['CHAT_ID']);
-	$error = '';
-	if (!\Bitrix\Im\Chat::isActionAllowed('chat' . $chatId, 'RENAME'))
-	{
-		$error = 'ACTION_DISABLED';
-	}
-	else
-	{
-		$CIMChat = new CIMChat();
-		$CIMChat->Rename($chatId, $_POST['CHAT_TITLE']);
-	}
+	// $userId = $USER->GetId();
+	// $chatId = intval($_POST['CHAT_ID']);
+	// $error = '';
+	// if (!\Bitrix\Im\Chat::isActionAllowed('chat' . $chatId, 'RENAME'))
+	// {
+	// 	$error = 'ACTION_DISABLED';
+	// }
+	// else
+	// {
+	// 	$CIMChat = new CIMChat();
+	// 	$CIMChat->Rename($chatId, $_POST['CHAT_TITLE']);
+	// }
 
-	echo \Bitrix\Im\Common::objectEncode(Array(
-		'CHAT_ID' => intval($_POST['CHAT_ID']),
-		'CHAT_TITLE' => $_POST['CHAT_TITLE'],
-		'ERROR' => $error
-	));
+	// echo \Bitrix\Im\Common::objectEncode(Array(
+	// 	'CHAT_ID' => intval($_POST['CHAT_ID']),
+	// 	'CHAT_TITLE' => $_POST['CHAT_TITLE'],
+	// 	'ERROR' => $error
+	// ));
 }
 else if (isImPostRequest('IM_CRM_SELECTOR'))
 {
@@ -2009,59 +2009,59 @@ else if (isImPostRequest('IM_SETTING_SAVE'))
 }
 else if (isImPostRequest('IM_SETTINGS_SAVE'))
 {
-	$errorMessage = "";
+	// $errorMessage = "";
 
-	$arSettings = CUtil::JsObjectToPhp($_POST['SETTINGS']);
+	// $arSettings = CUtil::JsObjectToPhp($_POST['SETTINGS']);
 
-	$oldSettings = CIMSettings::Get()[CIMSettings::SETTINGS];
-	if ($oldSettings['notifyScheme'] == 'expert' && $arSettings['notifyScheme'] == 'simple')
-	{
-		$arNotifyValues = CIMSettings::GetSimpleNotifyBlocked();
-		$arSettings['notify'] = Array();
-		foreach ($arNotifyValues as $settingName => $value)
-		{
-			$arSettings['notify'][CIMSettings::CLIENT_SITE.'|'.$settingName] = false;
-			$arSettings['notify'][CIMSettings::CLIENT_XMPP.'|'.$settingName] = false;
-			$arSettings['notify'][CIMSettings::CLIENT_MAIL.'|'.$settingName] = false;
-		}
-	}
+	// $oldSettings = CIMSettings::Get()[CIMSettings::SETTINGS];
+	// if ($oldSettings['notifyScheme'] == 'expert' && $arSettings['notifyScheme'] == 'simple')
+	// {
+	// 	$arNotifyValues = CIMSettings::GetSimpleNotifyBlocked();
+	// 	$arSettings['notify'] = Array();
+	// 	foreach ($arNotifyValues as $settingName => $value)
+	// 	{
+	// 		$arSettings['notify'][CIMSettings::CLIENT_SITE.'|'.$settingName] = false;
+	// 		$arSettings['notify'][CIMSettings::CLIENT_XMPP.'|'.$settingName] = false;
+	// 		$arSettings['notify'][CIMSettings::CLIENT_MAIL.'|'.$settingName] = false;
+	// 	}
+	// }
 
-	if (array_key_exists('notify', $arSettings))
-	{
-		CIMSettings::Set(CIMSettings::NOTIFY, $arSettings['notify']);
-		unset($arSettings['notify']);
-	}
-	CIMSettings::Set(CIMSettings::SETTINGS, $arSettings);
+	// if (array_key_exists('notify', $arSettings))
+	// {
+	// 	CIMSettings::Set(CIMSettings::NOTIFY, $arSettings['notify']);
+	// 	unset($arSettings['notify']);
+	// }
+	// CIMSettings::Set(CIMSettings::SETTINGS, $arSettings);
 
-	echo \Bitrix\Im\Common::objectEncode(Array(
-		'ERROR' => $errorMessage
-	));
+	// echo \Bitrix\Im\Common::objectEncode(Array(
+	// 	'ERROR' => $errorMessage
+	// ));
 }
 else if (isImPostRequest('IM_SETTINGS_NOTIFY_LOAD'))
 {
-	$errorMessage = "";
+	// $errorMessage = "";
 
-	$arSettings = CIMSettings::Get();
-	$arNotifyNames = CIMSettings::GetNotifyNames();
+	// $arSettings = CIMSettings::Get();
+	// $arNotifyNames = CIMSettings::GetNotifyNames();
 
-	echo \Bitrix\Im\Common::objectEncode(Array(
-		'NAMES' => $arNotifyNames,
-		'VALUES' => $arSettings['notify'],
-		'ERROR' => $errorMessage
-	));
+	// echo \Bitrix\Im\Common::objectEncode(Array(
+	// 	'NAMES' => $arNotifyNames,
+	// 	'VALUES' => $arSettings['notify'],
+	// 	'ERROR' => $errorMessage
+	// ));
 }
 else if (isImPostRequest('IM_SETTINGS_SIMPLE_NOTIFY_LOAD'))
 {
-	$errorMessage = "";
+	// $errorMessage = "";
 
-	$arNotifyNames = CIMSettings::GetNotifyNames();
-	$arNotifyValues = CIMSettings::GetSimpleNotifyBlocked(true);
+	// $arNotifyNames = CIMSettings::GetNotifyNames();
+	// $arNotifyValues = CIMSettings::GetSimpleNotifyBlocked(true);
 
-	echo \Bitrix\Im\Common::objectEncode(Array(
-		'NAMES' => $arNotifyNames,
-		'VALUES' => $arNotifyValues,
-		'ERROR' => $errorMessage
-	));
+	// echo \Bitrix\Im\Common::objectEncode(Array(
+	// 	'NAMES' => $arNotifyNames,
+	// 	'VALUES' => $arNotifyValues,
+	// 	'ERROR' => $errorMessage
+	// ));
 }
 else if (isImPostRequest('IM_DISK_ACTIVATE_PUBLIC_LINK'))
 {

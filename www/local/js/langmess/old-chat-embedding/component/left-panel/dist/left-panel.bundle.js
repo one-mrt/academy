@@ -5,14 +5,15 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 (function (
 		exports,
 		main_core_events,
-		im_oldChatEmbedding_component_recentList,
 		im_oldChatEmbedding_component_search,
 		im_oldChatEmbedding_const,
 		im_lib_utils,
 		ui_vue,
 		ui_vue_vuex,
 		im_const,
-		ui_designTokens
+		main_loc,
+		main_core,
+		BXPull
 	) {
 	'use strict';
 
@@ -22,12 +23,14 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 			onClick(event) {
 				this.$emit('click', {
 					id: this.item.id,
+					item: this.item,
 					$event: event
 				});
 			},
 			onRightClick(event) {
 				this.$emit('rightClick', {
 					id: this.item.id,
+					item: this.item,
 					$event: event
 				});
 			},
@@ -406,153 +409,6 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 	`
 	});
 
-	class EventHandler {
-		static instance = null;
-		store = null;
-		static init($Bitrix) {
-			if (this.instance) {
-				return;
-			}
-			this.instance = new this($Bitrix);
-		}
-		constructor($Bitrix) {
-			this.store = $Bitrix.Data.get('controller').store;
-			this.subscribeToEvents();
-		}
-		subscribeToEvents() {
-			this.onSetCounterHandler = this.onSetCounter.bind(this);
-			this.onSetMessageHandler = this.onSetMessage.bind(this);
-			this.onHideChatHandler = this.onHideChat.bind(this);
-			this.onLeaveChatHandler = this.onLeaveChat.bind(this);
-			this.onClearLikeHandler = this.onClearLike.bind(this);
-			this.onClearHistoryHandler = this.onClearHistory.bind(this);
-			main_core_events.EventEmitter.subscribe(im_oldChatEmbedding_const.EventType.recent.setCounter, this.onSetCounterHandler);
-			main_core_events.EventEmitter.subscribe(im_oldChatEmbedding_const.EventType.recent.setMessage, this.onSetMessageHandler);
-			main_core_events.EventEmitter.subscribe(im_oldChatEmbedding_const.EventType.recent.hideChat, this.onHideChatHandler);
-			main_core_events.EventEmitter.subscribe(im_oldChatEmbedding_const.EventType.recent.leaveChat, this.onLeaveChatHandler);
-			main_core_events.EventEmitter.subscribe(im_oldChatEmbedding_const.EventType.recent.clearLike, this.onClearLikeHandler);
-			main_core_events.EventEmitter.subscribe(im_oldChatEmbedding_const.EventType.dialog.clearHistory, this.onClearHistoryHandler);
-		}
-		onSetCounter({
-			data: {
-				dialogId,
-				counter
-			}
-		}) {
-			const recentItem = this.store.getters['recent/get'](dialogId);
-			const dialog = this.store.getters['dialogues/get'](dialogId);
-
-			if (!recentItem || !dialog) {
-				return false;
-			}
-			this.store.dispatch('dialogues/update', {
-				dialogId: dialogId,
-				fields: {
-					counter: counter
-				}
-			});
-		}
-		onSetMessage({
-			data: {
-				id,
-				dialogId,
-				text,
-				date
-			}
-		}) {
-			const recentItem = this.store.getters['recent/get'](dialogId);
-			const dialog = this.store.getters['dialogues/get'](dialogId);
-			if (!recentItem || !dialog) {
-				return false;
-			}
-			if (id && !id.toString().startsWith('temp') && id !== recentItem.element.message.id) {
-				return false;
-			}
-			this.store.dispatch('recent/update', {
-				id: dialogId,
-				fields: {
-					message: {
-						id: id || 0,
-						text: text,
-						senderId: this.getCurrentUserId(),
-						status: recentItem.element.message.status,
-						date: date || recentItem.element.message.date
-					}
-				}
-			});
-		}
-		onHideChat({
-			data: {
-				dialogId
-			}
-		}) {
-			const recentItem = this.store.getters['recent/get'](dialogId);
-			if (!recentItem) {
-				return false;
-			}
-			this.store.dispatch('recent/delete', {
-				id: dialogId
-			});
-		}
-		onLeaveChat({
-			data: {
-				dialogId
-			}
-		}) {
-			this.onHideChat({
-				data: {
-					dialogId
-				}
-			});
-		}
-		onClearLike({
-			data: {
-				dialogId
-			}
-		}) {
-			const recentItem = this.store.getters['recent/get'](dialogId);
-			if (!recentItem || !recentItem.liked) {
-				return false;
-			}
-			this.store.dispatch('recent/like', {
-				id: dialogId,
-				liked: false
-			});
-		}
-		onClearHistory({
-			data: {
-				dialogId
-			}
-		}) {
-			const recentItem = this.store.getters['recent/get'](dialogId);
-			if (!recentItem) {
-				return false;
-			}
-			this.store.dispatch('recent/update', {
-				id: dialogId,
-				fields: {
-					message: {
-						...recentItem.message,
-						text: main_core.Loc.getMessage('IM_RECENT_DELETED_MESSAGE')
-					}
-				}
-			});
-		}
-		getCurrentUserId() {
-			return this.store.state.application.common.userId;
-		}
-		destroy() {
-			this.unsubscribeEvents();
-		}
-		unsubscribeEvents() {
-			main_core_events.EventEmitter.unsubscribe(im_oldChatEmbedding_const.EventType.recent.setCounter, this.onSetCounterHandler);
-			main_core_events.EventEmitter.unsubscribe(im_oldChatEmbedding_const.EventType.recent.setMessage, this.onSetMessageHandler);
-			main_core_events.EventEmitter.unsubscribe(im_oldChatEmbedding_const.EventType.recent.hideChat, this.onHideChatHandler);
-			main_core_events.EventEmitter.unsubscribe(im_oldChatEmbedding_const.EventType.recent.leaveChat, this.onLeaveChatHandler);
-			main_core_events.EventEmitter.unsubscribe(im_oldChatEmbedding_const.EventType.recent.clearLike, this.onClearLikeHandler);
-		}
-	}
-
 	/**
 	 * Bitrix im
 	 * Recentlist vue component
@@ -583,16 +439,15 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 			};
 		},
 		created() {
-			EventHandler.init(this.$Bitrix);
 			this.initObserver()
+			this.subscribeToEvents()
 			this.searchPopup = null;
 		},
 		mounted() {
 			this.drawPlaceholders().then(this.getFirstPage);
-
-			// setTimeout(this.initObserver.bind(this), 500)
-			// this.initObserver()
-			// this.openSearch()
+		},
+		beforeUnmount() {
+			this.unsubscribeEvents()
 		},
 		computed: {
 			pinnedItems() {
@@ -610,6 +465,77 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 			})
 		},
 		methods: {
+
+			subscribeToEvents() {
+				main_core_events.EventEmitter.subscribe(im_const.EventType.dialog.messagesSet, this.onSetMessage.bind(this))
+
+				BXPull.subscribe({
+					moduleId: 'im',
+					command: 'readMessageChat',
+					callback: this.readMessageChat.bind(this)
+				})
+
+				BXPull.subscribe({
+					moduleId: 'im',
+					command: 'chatHide',
+					callback: this.updateRecentList.bind(this)
+				})
+			},
+
+			unsubscribeEvents() {
+				main_core_events.EventEmitter.unsubscribe(im_const.EventType.dialog.messagesSet, this.onSetMessage.bind(this))
+			},
+
+			readMessageChat(data) {
+				if(data.dialogId) {
+					let dialog = this.$store.getters['recent/get'](data.dialogId)
+
+					if(dialog) {
+						this.$store.dispatch('recent/update', {id:dialog.element.id, fields: {counter: data.counter}})
+					}
+				}
+			},
+
+			onSetMessage({data: {chatId, messageId}}) {
+				if(!chatId) {
+					return false
+				}
+
+				if(!messageId) {
+					messageId = this.$store.getters['messages/getLastId'](chatId)
+				}
+
+				if(!messageId) {
+					return false
+				}
+
+				this.updateRecentList()				
+			},
+
+			updateRecentList() {
+				this.getRestClient().callMethod(im_const.RestMethod.imRecentList, {'SKIP_OPENLINES': 'Y'}).then(result => {
+					let items = result.data().items;
+
+					if (!items || items.length === 0) {
+						return false;
+					}
+
+					result.data().items.forEach((item, key) => {
+						result.data().items[key].chatId = item.chat_id
+					})
+
+					this.lastMessageDate = this.getLastMessageDate(items);
+
+					if (!result.data().hasMore) {
+						this.hasMoreToLoad = false;
+					}
+
+					this.$store.dispatch('recent/clearPlaceholders');
+
+					this.getController().executeRestAnswer(im_const.RestMethodHandler.imRecentList, result);
+				})
+			},
+
 			/* region 01. Handlers */
 			onScroll(event) {
 				if (this.oneScreenRemaining(event)) {
@@ -661,9 +587,16 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 					if (!result.data().hasMore) {
 						this.hasMoreToLoad = false;
 					}
+
 					this.$store.dispatch('recent/clearPlaceholders');
+
+					result.data().items.forEach((item, key) => {
+						result.data().items[key].chatId = item.chat_id
+					})
 					//set first chunk of real data in rest handler
 					this.getController().executeRestAnswer(im_const.RestMethodHandler.imRecentList, result);
+
+					// console.info('first')
 				});
 			},
 			loadNextPage() {
@@ -705,6 +638,8 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 							this.$store.dispatch('recent/clearPlaceholders');
 						}
 					});
+
+					console.info('next')
 				});
 			},
 			getLastMessageDate(collection) {
@@ -729,12 +664,14 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 				items.forEach(item => {
 					let userId = 0;
 					let chatId = 0;
+
 					if (item.user && item.user.id > 0) {
 						userId = item.user.id;
 						result.users.push(item.user);
 					}
-					if (item.chat) {
-						chatId = item.chat.id;
+
+					if (item.type == 'chat') {
+						chatId = item.chat_id;
 						result.dialogues.push(Object.assign(item.chat, {
 							dialogId: item.id
 						}));
@@ -743,6 +680,7 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 							dialogId: item.id
 						}));
 					}
+
 					result.recent.push({
 						...item,
 						avatar: item.avatar.url,
@@ -765,17 +703,213 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 			},
 			openOldContextMenu(event) {
 				event.$event.preventDefault();
-				const recentItem = this.$store.getters['recent/get'](event.id);
+
+				let recentItem = this.$store.getters['recent/get'](event.id)
+				let dialog = this.$store.getters['dialogues/get'](event.id)
+
 				if (!recentItem) {
 					return false;
 				}
+
+				console.info(recentItem, dialog)
+
+				this.closeMenuPopup()
+
 				const params = {
-					userId: event.id,
-					userIsChat: event.id.toString().startsWith('chat'),
-					dialogIsPinned: recentItem.element.pinned
-				};
-				BXIM.messenger.openPopupMenu(event.$event.target, 'contactList', undefined, params);
+					chatType: recentItem.element.chatType,
+					dialogId: dialog.dialogId,
+					pinned: recentItem.element.pinned,
+					userId: recentItem.element.userId,
+					restrictions: dialog.restrictions,
+					mute: dialog.muteList.length > 0,
+				}
+
+				this.contactListMenu(params, event.$event.target)
 			},
+
+			closeMenuPopup() {
+				if (BX.MessengerChat.popupPopupMenu != null && BX.MessengerChat.popupPopupMenuDateCreate+100 < (+new Date())) {
+					BX.MessengerChat.popupPopupMenu.close();
+				}
+
+				main_core_events.EventEmitter.emit(im_oldChatEmbedding_const.EventType.dialog.closePopup);
+			},
+
+			hideChat(dialogId) {
+				this.getRestClient()
+					.callMethod("im.recent.hide", {
+						'DIALOG_ID': dialogId
+					}).then(result => {
+						if(result.answer.result) {
+							this.updateRecentList()
+						}
+					})
+			},
+
+			muteChat(dialog) {
+				this.getRestClient()
+					.callMethod("im.chat.mute", {
+						'DIALOG_ID': dialog.dialogId,
+						'ACTION': dialog.mute ? 'N' : 'Y'
+					}).then(result => {
+						if(result.answer.result) {
+							this.updateRecentList()
+						}
+					})
+			},
+
+			pinChat(dialog) {
+				this.getRestClient()
+					.callMethod("im.recent.pin", {
+						'DIALOG_ID': dialog.dialogId,
+						'ACTION': dialog.pinned ? 'N' : 'Y'
+					}).then(result => {
+						if(result.answer.result) {
+							this.updateRecentList()
+						}
+					})
+			},
+
+			contactListMenu(dialog, target) {
+				let oldMesChat = BX.MessengerChat;
+
+				let offsetTop = 2;
+				let offsetLeft = 25;
+				let userId = dialog.userId
+				let userIsChat = dialog.chatType == 'chat'
+				let dialogIsPinned = dialog.pinned
+				let menuItems = [];
+
+				let isMuteAllowed = dialog.restrictions.mute
+				let muteEnable = dialog.mute
+				let chatMuteText = main_core.message('IM_M_CHAT_MUTE_OFF');
+
+				if (isMuteAllowed && !muteEnable) {
+					chatMuteText = main_core.message('IM_M_CHAT_MUTE_ON');
+				}
+
+				let dialogPinnedText = main_core.message(!dialogIsPinned ? 'IM_M_OL_PIN_ON': 'IM_M_OL_PIN_OFF')
+
+				menuItems = [
+					{
+						icon: 'bx-messenger-menu-write',
+						text: main_core.message('IM_M_OPEN_CHAT'),
+						onclick: main_core.delegate((event) => {
+							BXIM.openMessenger(dialog.dialogId);
+							this.closeMenuPopup();
+						}, this)
+					},
+					{
+						icon: 'bx-messenger-menu-pin',
+						text: dialogPinnedText,
+						onclick: main_core.delegate(function() {
+							this.pinChat(dialog)
+							this.closeMenuPopup();
+						}, this)
+					},
+
+					isMuteAllowed && userIsChat ? {
+						icon: 'bx-messenger-menu-chat-mute',
+						text: chatMuteText,
+						onclick: main_core.delegate(function() {
+							this.muteChat(dialog)
+							this.closeMenuPopup()
+						}, this)
+					} : {},
+
+					userIsChat ? null : {
+						icon: 'bx-messenger-menu-history',
+						text: main_core.message('IM_M_OPEN_HISTORY'),
+						onclick: main_core.delegate(function() {
+							BXIM.openHistory(userId);
+							this.closeMenuPopup();
+						}, this)
+					},
+					{
+						icon: 'bx-messenger-menu-hide-'+(userIsChat? 'chat': 'dialog'),
+						text: main_core.message('IM_M_HIDE_' + (dialog.chatType == 'chat' ? 'CHAT' : 'DIALOG')),
+						onclick: BX.delegate(function() {
+							this.hideChat(dialog.dialogId)
+							this.closeMenuPopup();
+						}, this)
+					},
+				];
+
+				oldMesChat.popupPopupMenuDateCreate = + new Date();
+				
+				oldMesChat.popupPopupMenu = new BX.PopupWindow('bx-messenger-popup-contactList', target, {
+					//parentPopup: this.popupMessenger,
+					targetContainer: document.body,
+					// darkMode: BX.MessengerTheme.isDark(),
+					lightShadow : true,
+					offsetTop: offsetTop,
+					offsetLeft: offsetLeft,
+					autoHide: true,
+					closeByEsc: true,
+					zIndex: BX.MessengerCommon.getDefaultZIndex()+200,
+					bindOptions: {}, //bindOptions,
+					events : {
+						onPopupClose : BX.delegate(function() {
+							if (oldMesChat.popupPopupMenuStyle && oldMesChat.popupPopupMenu)
+							{
+								if (oldMesChat.popupPopupMenuStyle == 'bx-messenger-file-active') {
+									BX.removeClass(oldMesChat.popupPopupMenu.bindElement.parentNode, oldMesChat.popupPopupMenuStyle);
+								} else if (oldMesChat.popupPopupMenuStyle == 'bx-messenger-content-item-menu-hover') {
+									BX.removeClass(oldMesChat.popupPopupMenu.bindElement.parentNode, oldMesChat.popupPopupMenuStyle);
+								} else {
+									BX.removeClass(oldMesChat.popupPopupMenu.bindElement, oldMesChat.popupPopupMenuStyle);
+								}
+							}
+							
+							if (oldMesChat.popupPopupMenuDateCreate+500 < (+new Date())) {
+								BX.proxy_context.destroy()
+							}
+
+						}, oldMesChat),
+						onPopupDestroy : BX.delegate(function() {
+							if (oldMesChat.popupPopupMenuStyle && oldMesChat.popupPopupMenu)
+							{
+								if (oldMesChat.popupPopupMenuStyle == 'bx-messenger-file-active')
+									BX.removeClass(oldMesChat.popupPopupMenu.bindElement.parentNode, oldMesChat.popupPopupMenuStyle);
+								else if (oldMesChat.popupPopupMenuStyle == 'bx-messenger-content-item-menu-hover')
+									BX.removeClass(oldMesChat.popupPopupMenu.bindElement.parentNode, oldMesChat.popupPopupMenuStyle);
+								else
+									BX.removeClass(oldMesChat.popupPopupMenu.bindElement, oldMesChat.popupPopupMenuStyle);
+							}
+							oldMesChat.popupPopupMenu = null;
+						}, oldMesChat)
+					},
+					content : BX.create("div", {
+						props : {
+							className : "bx-messenger-popup-menu"
+						},
+						children: [ //TODO SCROLL
+							BX.create("div", {
+								props : {
+									className : "bx-messenger-popup-menu-items"
+								},
+								children: BX.MessengerChat.MenuPrepareList(menuItems)
+							})
+						]
+					})
+				});
+
+				BX.addClass(oldMesChat.popupPopupMenu.popupContainer, "bx-messenger-mark");
+				oldMesChat.popupPopupMenu.show();
+
+				if (oldMesChat.popupPopupMenuStyle) {
+					if (oldMesChat.popupPopupMenuStyle == 'bx-messenger-file-active') {
+						BX.addClass(bind.parentNode, oldMesChat.popupPopupMenuStyle);
+					} else if (oldMesChat.popupPopupMenuStyle == 'bx-messenger-content-item-menu-hover') {
+						BX.addClass(bind.parentNode, oldMesChat.popupPopupMenuStyle);
+					} else {
+						BX.addClass(bind, oldMesChat.popupPopupMenuStyle);
+					}
+				}
+
+				BX.bind(oldMesChat.popupPopupMenu.popupContainer, "click", BX.MessengerCommon.preventDefault);
+			},
+
 			/* endregion 03. Actions */
 
 			/* region 04. Helpers */
@@ -807,15 +941,6 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 				});
 			},
 			/* endregion 04. Helpers */
-			// openSearch() {
-			// 	if (!this.searchPopup) {
-			// 		this.searchPopup = new Search({
-			// 			targetNode: document.querySelector('.lang-messanger--search'),
-			// 			store: this.$store
-			// 		});
-			// 	}
-			// 	this.searchPopup.open();
-			// },
 		},
 		directives: {
 			'recent-list-observer': {
@@ -862,7 +987,7 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 	// @vue/component
 	const LeftPanel = ui_vue.BitrixVue.component('bx-im-component-left-panel', {
 		components: {
-			RecentListComponent: RecentListItem, // im_oldChatEmbedding_component_recentList.RecentList,
+			RecentListItem,
 			SearchComponent: im_oldChatEmbedding_component_search.Search
 		},
 		data: function () {
@@ -910,23 +1035,20 @@ this.BX.Messenger.Embedding = this.BX.Messenger.Embedding || {};
 		template: `
 		<div class="bx-im-left-panel-wrap">
 			<SearchComponent v-show="searchMode" :searchMode="searchMode" :searchQuery="searchQuery" />
-			<RecentListComponent v-show="!searchMode" />
+			<recent-list-item v-show="!searchMode" />
 		</div>
 	`
 	});
-
-	// exports.LeftPanel = LeftPanel;
-
 })(
 	this.BX.Messenger.Embedding.ComponentLegacy = this.BX.Messenger.Embedding.ComponentLegacy || {},
-	BX.Event, 
-	BX.Messenger.Embedding.ComponentLegacy, 
+	BX.Event,
 	BX.Messenger.Embedding.ComponentLegacy, 
 	BX.Messenger.Embedding.Const,
 	BX.Messenger.Lib,
 	BX,
 	BX,
 	BX.Messenger.Const,
-	BX
+	BX.Loc,
+	BX,
+	BX.PULL
 );
-//# sourceMappingURL=left-panel.bundle.js.map

@@ -2,116 +2,6 @@
 (function (ui_vue, ui_vue_vuex, im_const, ui_designTokens, im_lib_utils, main_core_events, im_oldChatEmbedding_const) {
 	'use strict';
 
-	class Search {
-		constructor(params = {}) {
-			if (typeof params.store === 'object' && params.store) {
-				this.store = params.store;
-			}
-			this.dialog = new LG.EntitySelector.Dialog({
-				targetNode: params.targetNode,
-				enableSearch: true,
-				context: 'IM_CHAT_SEARCH',
-				multiple: false,
-				showAvatars: true,
-				compactView: false,
-				rendered: false,
-				entities: [
-					{
-						id: 'user',
-						dynamicLoad: true,
-						dynamicSearch: true,
-						filters: [{
-							id: 'im.userDataFilter'
-						}]
-					},
-				// 	{
-				// 		id: 'department'
-				// 	},
-					{
-						id: 'im-chat',
-						options: {
-							searchableChatTypes: ['C', 'L', 'O'],
-							fillDialogWithDefaultValues: false
-						},
-						dynamicLoad: true,
-						dynamicSearch: true
-					},
-					{
-						id: 'imol-chat',
-						dynamicLoad: true,
-						dynamicSearch: true
-					}
-				// 	// {
-				// 	// 	id: 'im-bot',
-				// 	// 	options: {
-				// 	// 		searchableBotTypes: ['H', 'B', 'S', 'N']
-				// 	// 	}
-				// 	// }
-				],
-				events: {
-					'Item:onSelect': event => this.onItemSelect(event),
-					'onLoad': event => this.fillStore(event)
-				}
-			});
-		}
-		onItemSelect(event) {
-			this.dialog.deselectAll();
-			const item = event.getData().item;
-			const dialogId = this.getDialogIdByItem(item);
-			if (!dialogId) {
-				return;
-			}
-			main_core_events.EventEmitter.emit(im_const.EventType.dialog.open, {
-				id: dialogId,
-				$event: event
-			});
-		}
-		fillStore(event) {
-			const dialog = event.getTarget();
-			const items = dialog.getItems();
-			let users = [];
-			let dialogues = [];
-			items.forEach(item => {
-				const customData = item.getCustomData();
-				const entityId = item.getEntityId();
-				if (entityId === 'user' || entityId === 'im-bot') {
-					const dialogId = customData.get('imUser')['ID'];
-					if (!dialogId) {
-						return;
-					}
-					users.push({
-						dialogId,
-						...customData.get('imUser')
-					});
-				} else if (entityId === 'im-chat') {
-					const dialogId = 'chat' + customData.get('imChat')['ID'];
-					if (!dialogId) {
-						return;
-					}
-					dialogues.push({
-						dialogId,
-						...customData.get('imChat')
-					});
-				}
-			});
-			this.store.dispatch('users/set', users);
-			this.store.dispatch('dialogues/set', dialogues);
-		}
-		getDialogIdByItem(item) {
-			switch (item.getEntityId()) {
-				case 'user':
-				// case 'im-bot':
-					return item.getCustomData().get('imUser')['ID'];
-				case 'im-chat':
-					return 'chat' + item.getCustomData().get('imChat')['ID'];
-			}
-			return null;
-		}
-		open() {
-			this.dialog.show();
-		}
-	}
-
 	const RecentItem = ui_vue.BitrixVue.localComponent('bx-im-component-recent-item', {
 		props: ['itemData'],
 		methods: {
@@ -523,7 +413,10 @@
 			this.onClearLikeHandler = this.onClearLike.bind(this);
 			this.onClearHistoryHandler = this.onClearHistory.bind(this);
 			main_core_events.EventEmitter.subscribe(im_oldChatEmbedding_const.EventType.recent.setCounter, this.onSetCounterHandler);
+
 			main_core_events.EventEmitter.subscribe(im_oldChatEmbedding_const.EventType.recent.setMessage, this.onSetMessageHandler);
+			main_core_events.EventEmitter.subscribe(im_const.EventType.dialog.messagesSet, this.onSetMessageHandler)
+
 			main_core_events.EventEmitter.subscribe(im_oldChatEmbedding_const.EventType.recent.hideChat, this.onHideChatHandler);
 			main_core_events.EventEmitter.subscribe(im_oldChatEmbedding_const.EventType.recent.leaveChat, this.onLeaveChatHandler);
 			main_core_events.EventEmitter.subscribe(im_oldChatEmbedding_const.EventType.recent.clearLike, this.onClearLikeHandler);
@@ -547,6 +440,7 @@
 					counter: counter
 				}
 			});
+			console.info(counter)
 		}
 		onSetMessage({
 			data: {
@@ -681,14 +575,9 @@
 		created() {
 			EventHandler.init(this.$Bitrix);
 			this.initObserver()
-			this.searchPopup = null;
 		},
 		mounted() {
 			this.drawPlaceholders().then(this.getFirstPage);
-
-			// setTimeout(this.initObserver.bind(this), 500)
-			// this.initObserver()
-			// this.openSearch()
 		},
 		computed: {
 			pinnedItems() {
@@ -903,24 +792,14 @@
 				});
 			},
 			/* endregion 04. Helpers */
-			// openSearch() {
-			// 	if (!this.searchPopup) {
-			// 		this.searchPopup = new Search({
-			// 			targetNode: document.querySelector('.lang-messanger--search'),
-			// 			store: this.$store
-			// 		});
-			// 	}
-			// 	this.searchPopup.open();
-			// },
 		},
 		directives: {
 			'recent-list-observer': {
 				inserted(element, bindings, vnode) {
 					try {
-						// console.info(element)
 						vnode.context.observer.observe(element);
 					} catch(ex) {
-						// console.info(element)
+
 					}
 				}
 			}

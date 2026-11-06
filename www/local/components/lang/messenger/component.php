@@ -195,16 +195,12 @@ $arResult['PATH_TO_LF'] = IsModuleInstalled('intranet') && \Bitrix\Main\IO\File:
 
 
 
-CJSCore::RegisterExt('mess_common', array(
+CJSCore::RegisterExt('mess_common', [
 	'js' => '/local/js/langmess/common.js',
-	'css' => ['/local/js/langmess/css/common.css', /*'/bitrix/js/im/css/dark_im.css'*/],
+	'css' => ['/local/js/langmess/css/common.css'],
 	'lang' => '/bitrix/modules/im/js_common.php',
-	'rel' => array(/*'ui.design-tokens',*/ 'ls', 'ajax', 'date', 'fx', 'user', 'rest.client', /*'phone_number',*/ 'loader', 'ui.viewer', 'main.md5', 'im.debug', /*'ui.notification'*/)
-));
-
-// CJSCore::RegisterExt('mess_desktop_utils', array(
-// 	'js' => '/bitrix/js/im/desktop_utils.js',
-// ));
+	'rel' => array('ls', 'ajax', 'date', 'fx', 'user', 'rest.client', /*'phone_number',*/ 'loader', 'ui.viewer', 'main.md5', 'im.debug', /*'ui.notification'*/)
+]);
 
 $jsIm = [
 	'/local/js/langmess/im.js'
@@ -213,12 +209,9 @@ $jsIm = [
 $jsCoreRel = [
 	'ui.design-tokens',
 	'ui.fonts.opensans',
-	// 'mess_desktop_utils',
 	'resize_observer',
 	'mess_common',
-	'im.lib.localstorage',
 	'clipboard',
-	// 'sidepanel',
 	'loader',
 	'ui.notification',
 	'ui.alerts',
@@ -226,23 +219,25 @@ $jsCoreRel = [
 	'ui.buttons',
 	'ui.switcher',
 	'ui.hint',
+	'im.lib.localstorage',
+	'im.old-chat-embedding.const',
+	'im.old-chat-embedding.lib.logger',
+	'im.old-chat-embedding.lib.smile-manager',
+	'im.old-chat-embedding.lib.utils',
+	'im.old-chat-embedding.model',
+	'im.old-chat-embedding.provider.pull',
+	'main.core',
+	'pull.client',
+	'rest.client',
+	'ui.vue3',
+	'ui.vue3.vuex',
 	'langmess.application.launch',
 	'langmess.application.left-panel',
-	// 'langmess.component.recent',
-	// 'langmess.application.recent',
-	'im.old-chat-embedding.application.core',
-	// 'langmess.entity-selector',
-	// 'langmess.old-chat-embedding.component.search'
-	'langmess.old-chat-embedding.component.recent-list'
-	// 'langmess.old-chat-embedding.application.left-panel',
-	// 'im.old-chat-embedding.application.sidebar',
 ];
 
 CJSCore::RegisterExt('langmess', array(
 	'js' => $jsIm,
-	'css' => array(
-		'/local/js/langmess/css/im.css',
-	),
+	'css' => ['/local/js/langmess/css/im.css'],
 	'lang' => '/bitrix/modules/im/lang/'.LANGUAGE_ID.'/js_im.php',
 	'rel' => $jsCoreRel
 ));
@@ -250,32 +245,10 @@ CJSCore::RegisterExt('langmess', array(
 
 $initJs = 'langmess';
 $promoType = \Bitrix\Im\Promotion::DEVICE_TYPE_BROWSER;
-// if ($arResult["CONTEXT"] == 'DESKTOP' || (isset($arParams['WITH_DESKTOP']) && $arParams['WITH_DESKTOP']))
-// {
-// 	$initJs = 'im_desktop';
-// 	$promoType = \Bitrix\Im\Promotion::DEVICE_TYPE_DESKTOP;
-// }
-// else if ($arResult["DESIGN"] == 'DESKTOP')
-// {
-// 	$initJs = 'im_page';
-// }
 
 $arResult['PROMO'] = \Bitrix\Im\Promotion::getActive($promoType);
 
-// if (CModule::IncludeModule('call'))
-// {
-// 	$arResult['TURN_SERVER'] = COption::GetOptionString('call', 'turn_server');
-// 	$arResult['TURN_SERVER_FIREFOX'] = COption::GetOptionString('call', 'turn_server');
-// 	$arResult['TURN_SERVER_LOGIN'] = COption::GetOptionString('call', 'turn_server_login');
-// 	$arResult['TURN_SERVER_PASSWORD'] = COption::GetOptionString('call', 'turn_server_password');
-
-// 	$arResult['LIMIT'] = \Bitrix\Call\Limit::getTypesForJs();
-// }
-
-// echo '<pre>', print_r($initJs, 1), '</pre>';
-
 CJSCore::Init($initJs);
-// \Bitrix\Main\UI\Extension::load(['ui.buttons', 'ui.buttons.icons']);
 
 if (!(isset($arParams['TEMPLATE_HIDE']) && $arParams['TEMPLATE_HIDE'] == 'Y'))
 	$this->IncludeComponentTemplate();

@@ -242,12 +242,6 @@
 		return birthday == currentDate;
 	};
 
-	MessengerCommon.prototype.pinDialog = function(dialogId, active)
-	{
-		this.recentListElementPin(dialogId, active);
-		BX.rest.callMethod('im.recent.pin', {'DIALOG_ID': dialogId, 'ACTION': active? 'Y': 'N'});
-	};
-
 	MessengerCommon.prototype.muteMessageChat = function(dialogId, mute, sendAjax)
 	{
 		var chatId = 0;
@@ -3465,74 +3459,6 @@
 		});
 	};
 
-	MessengerCommon.prototype.recentListHide = function(dialogId, sendAjax)
-	{
-		if (!dialogId)
-			return false;
-
-		this.BXIM.messenger.recent = this.BXIM.messenger.recent.filter(function(element){
-			return element.id != dialogId;
-		});
-
-		if (this.BXIM.messenger.recentList)
-		{
-			this.recentListRedraw();
-		}
-
-		if (!this.isMobile())
-		{
-			BX.localStorage.set('mrlr', dialogId, 5);
-		}
-
-		if (this.BXIM.messenger.birthdayRecent[dialogId])
-		{
-			BX.localStorage.set('mbdh-'+dialogId, true, 86400);
-			delete this.BXIM.messenger.birthdayRecent[dialogId];
-		}
-
-		sendAjax = sendAjax != false;
-
-		if (sendAjax)
-		{
-			if (BX.MessengerProxy)
-			{
-				BX.MessengerProxy.sendHideChatEvent(dialogId);
-			}
-			BX.ajax({
-				url: this.BXIM.pathToAjax+'?RECENT_HIDE&V='+this.BXIM.revision,
-				method: 'POST',
-				dataType: 'json',
-				timeout: 60,
-				data: {'IM_RECENT_HIDE' : 'Y', 'DIALOG_ID' : dialogId, 'IM_AJAX_CALL' : 'Y', 'sessid': BX.bitrix_sessid()}
-			});
-		}
-
-		this.readMessage(dialogId, sendAjax, false);
-
-		if (dialogId.toString().substr(0, 4) == 'chat')
-		{
-			if (this.isMobile())
-			{
-				app.onCustomEvent('onPullClearWatch', {'id': 'IM_PUBLIC_'+dialogId.substr(4)});
-			}
-			else
-			{
-				BX.PULL.clearWatch('IM_PUBLIC_'+dialogId.substr(4));
-			}
-		}
-
-		delete this.BXIM.messenger.showMessage[dialogId];
-		delete this.BXIM.messenger.history[dialogId];
-
-		if (this.BXIM.messenger.currentTab == dialogId)
-		{
-			this.BXIM.messenger.currentTab = 0;
-			this.BXIM.messenger.extraOpen(
-				BX.create("div", { attrs : { style : "padding-top: 300px"}, props : { className : "bx-messenger-box-empty" }, html: BX.message('IM_M_EMPTY')})
-			);
-		}
-	};
-
 	MessengerCommon.prototype.recentListElementUpdate = function(dialogId, messageId, messageText, chatCounter, isMuted)
 	{
 		var element = this.BXIM.messenger.recent.find(function(element) {
@@ -3607,6 +3533,9 @@
 
 	MessengerCommon.prototype.recentListElementPin = function(dialogId, active)
 	{
+		// BX.Messenger.Embedding.Application.Core.getStore()
+		// console.info(this.BXIM.messenger.recent)
+
 		var element = this.BXIM.messenger.recent.find(function(element) {
 			return element.id == dialogId;
 		});
@@ -5291,10 +5220,6 @@
 
 		var element = this.recentListGetItem(userId);
 		var user = this.BXIM.messenger.users[userId];
-		if (element)
-		{
-			this.recentListHide(userId, false);
-		}
 		if (user)
 		{
 			delete this.BXIM.messenger.users[userId];
@@ -6874,125 +6799,6 @@
 		return count;
 	}
 
-
-
-	/* Section: Chats */
-	MessengerCommon.prototype.leaveFromChat = function(chatId, sendAjax)
-	{
-		if (!this.BXIM.messenger.chat[chatId])
-			return false;
-
-		sendAjax = sendAjax != false;
-
-		if (!sendAjax)
-		{
-			if (this.BXIM.messenger.chat[chatId].type != 'open' || this.BXIM.messenger.users[this.BXIM.userId].extranet)
-			{
-				delete this.BXIM.messenger.chat[chatId];
-				delete this.BXIM.messenger.userInChat[chatId];
-				delete this.BXIM.messenger.unreadMessage['chat'+chatId];
-				delete this.BXIM.messenger.showMessage['chat'+chatId];
-
-				if (this.BXIM.messenger.popupMessenger != null)
-				{
-					if (this.BXIM.messenger.currentTab == 'chat'+chatId)
-					{
-						this.BXIM.messenger.currentTab = 0;
-						this.BXIM.messenger.openChatFlag = false;
-						this.BXIM.messenger.openCallFlag = false;
-						this.BXIM.messenger.openLinesFlag = false;
-						this.BXIM.messenger.extraClose();
-					}
-				}
-			}
-			else
-			{
-				for(var i = 0; i < this.BXIM.messenger.userInChat[chatId].length; i++)
-				{
-					if (this.BXIM.userId == parseInt(this.BXIM.messenger.userInChat[chatId][i]))
-					{
-						delete this.BXIM.messenger.userInChat[chatId][i];
-						break;
-					}
-				}
-				this.BXIM.messenger.dialogStatusRedraw();
-				delete this.BXIM.messenger.unreadMessage['chat'+chatId];
-				delete this.BXIM.messenger.showMessage['chat'+chatId];
-			}
-
-			this.recentListHide('chat'+chatId, false);
-			this.userListRedraw();
-
-			this.BXIM.messenger.updateMessageCount();
-			this.BXIM.updateCounter();
-		}
-		else
-		{
-			if (BX.MessengerProxy)
-			{
-				BX.MessengerProxy.sendLeaveChatEvent('chat'+chatId);
-			}
-			BX.ajax({
-				url: this.BXIM.pathToAjax+'?CHAT_LEAVE&V='+this.BXIM.revision,
-				method: 'POST',
-				dataType: 'json',
-				timeout: 60,
-				data: {'IM_CHAT_LEAVE' : 'Y', 'CHAT_ID' : chatId, 'IM_AJAX_CALL' : 'Y', 'sessid': BX.bitrix_sessid()},
-				onsuccess: BX.delegate(function(data){
-					if (data.ERROR == '')
-					{
-						this.readMessage('chat'+data.CHAT_ID, true, false);
-
-						if (
-							!this.BXIM.messenger.chat[data.CHAT_ID]
-							|| this.BXIM.messenger.chat[data.CHAT_ID].type != 'open'
-							|| this.BXIM.messenger.users[this.BXIM.userId].extranet
-						)
-						{
-							delete this.BXIM.messenger.showMessage[data.CHAT_ID];
-							delete this.BXIM.messenger.userInChat[data.CHAT_ID];
-							delete this.BXIM.messenger.unreadMessage[data.CHAT_ID];
-							delete this.BXIM.messenger.chat[data.CHAT_ID];
-
-							if (this.BXIM.messenger.popupMessenger != null)
-							{
-								if (this.BXIM.messenger.currentTab == 'chat' + data.CHAT_ID)
-								{
-									this.BXIM.messenger.currentTab = 0;
-									this.BXIM.messenger.openChatFlag = false;
-									this.BXIM.messenger.openCallFlag = false;
-									this.BXIM.messenger.openLinesFlag = false;
-									BX.localStorage.set('mct', this.BXIM.messenger.currentTab, 15);
-									this.BXIM.messenger.extraClose();
-								}
-							}
-						}
-						else
-						{
-							for(var i = 0; i < this.BXIM.messenger.userInChat[data.CHAT_ID].length; i++)
-							{
-								if (this.BXIM.userId == parseInt(this.BXIM.messenger.userInChat[data.CHAT_ID][i]))
-								{
-									delete this.BXIM.messenger.userInChat[data.CHAT_ID][i];
-									break;
-								}
-							}
-							delete this.BXIM.messenger.unreadMessage[data.CHAT_ID];
-							this.BXIM.messenger.dialogStatusRedraw();
-						}
-
-						this.recentListHide('chat'+data.CHAT_ID, false);
-						this.userListRedraw();
-						BX.localStorage.set('mcl', data.CHAT_ID, 5);
-
-						this.BXIM.messenger.updateMessageCount();
-						this.BXIM.updateCounter();
-					}
-				}, this)
-			});
-		}
-	};
-
 	MessengerCommon.prototype.isSlider = function()
 	{
 		return location.href.toString().indexOf('SIDE_SLIDER') > 0;
@@ -7053,8 +6859,8 @@
 			return false;
 		}
 
-		var pullHandler = BX.delegate(function(command,params,extra)
-		{
+		var pullHandler = BX.delegate(function(command,params,extra) {
+			console.info('pullHandler', command, params, extra)
 			if (this.isMobile())
 			{
 				this.BXIM.checkRevision(extra.revision_im_mobile);
@@ -8510,8 +8316,6 @@
 				if (this.MobileActionNotEqual('DIALOG', 'RECENT'))
 					return false;
 
-				this.recentListHide(params.dialogId, false);
-
 				if (!this.isMobile() && params.dialogId == this.BXIM.messenger.currentTab)
 				{
 					BX.MessengerCommon.dialogCloseCurrent();
@@ -8684,7 +8488,6 @@
 				if (params.userId == this.BXIM.userId)
 				{
 					this.readMessage('chat'+params.chatId, true, false, true);
-					this.leaveFromChat(params.chatId, false);
 				}
 				else if (this.MobileActionEqual('DIALOG'))
 				{
@@ -8789,7 +8592,6 @@
 				{
 					delete this.BXIM.messenger.users[params.botId];
 				}
-				this.recentListHide(params.botId, false);
 
 				if (this.BXIM.messenger.currentTab == params.botId)
 				{
@@ -9002,8 +8804,8 @@
 			}
 		}, this);
 
-		var pullOnlineHandler = BX.delegate(function(command, params)
-		{
+		var pullOnlineHandler = BX.delegate(function(command, params) {
+			console.info('pullOnlineHandler', command, params)
 			if (this.isMobile())
 			{
 				params = command.params;
@@ -10717,6 +10519,11 @@
 				for (var i in data.CHAT)
 				{
 					data.CHAT[i].date_create = new Date(data.CHAT[i].date_create);
+
+					if(data.CHAT[i].avatar.startsWith('/bitrix/js/im/images/')) {
+						data.CHAT[i].avatar = this.BXIM.pathToBlankImage
+					}
+
 					this.BXIM.messenger.chat[i] = data.CHAT[i];
 				}
 				for (var i in data.USER_IN_CHAT)

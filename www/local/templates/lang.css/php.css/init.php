@@ -22,7 +22,7 @@ if($USER->IsAdmin() && $_GET['langUpdate'] == 'y'):?>
             modifier: `pn-f t-0 rt--200% b-0 md:pn-r md:rt-0 tp-rt tnd-500ms tm-r45
                 tm-r180 sm:mw-480px md:p-64 bc-EDF0F9 c-f00 pix-8 pby-8 pix-16 mi--8 h:bi-ggnf
                 mxh-200px pt-52 bc-C5C5C5 ofy-a p-48 p-64 sm:p-64 mi-16 sm:f-14 sm:f-16
-                lg:f-10 bc-c90536 fv:ow-0 fv:os-n bcr-f5f6f6 h:bi-n h:bc-F4F4FD bcr-F4F4FD z-4`,
+                lg:f-10 bc-c90536 fv:ow-0 fv:os-n bcr-f5f6f6 h:bi-n h:bc-F4F4FD bcr-F4F4FD z-4 bbc-525c6914`,
             breakpoint: {
                 sm: 576,
                 md: 768,

@@ -422,13 +422,13 @@
 					/>
 				</transition>
 			</div>
-			<div class="bx-im-textarea-app-box">
+			<!--<div class="bx-im-textarea-app-box">
 				<label v-if="enableFile && !isIE11" class="bx-im-textarea-app-button bx-im-textarea-app-file" :title="localize.BX_MESSENGER_TEXTAREA_FILE">
 					<input type="file" @click="onFileClick($event)" @change="onFileSelect($event)" multiple>
 				</label>
 				<button class="bx-im-textarea-app-button bx-im-textarea-app-smile" :title="localize.BX_MESSENGER_TEXTAREA_SMILE" @click="onAppButtonClick('smile', $event)"></button>
 				<button v-if="false" class="bx-im-textarea-app-button bx-im-textarea-app-gif" :title="localize.BX_MESSENGER_TEXTAREA_GIPHY" @click="onAppButtonClick('giphy', $event)"></button>
-			</div>
+			</div>-->
 		</div>
 	`
 	});
