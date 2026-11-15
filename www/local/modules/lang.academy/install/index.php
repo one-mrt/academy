@@ -42,13 +42,37 @@ class lang_academy extends CModule {
 		$this->PARTNER_URI = Loc::getMessage("{$this->MODULE_ID}_PARTNER_URI");
 	}
 
-	public function InstallDB()
+	public function installDB()
 	{
+        Loader::includeModule('lang.academy');
+
+        $agentName = "Lang\Academy\Agent\OfferStatus::run();";
+        $res = \CAgent::GetList([],["NAME" => $agentName, "MODULE_ID" => $this->MODULE_ID]);
+
+        if(!$res->Fetch()) {           
+            \CAgent::AddAgent(
+                $agentName,
+                $this->MODULE_ID,
+                period: 'N',
+                interval: 60,
+                next_exec: \ConvertTimeStamp(time(), 'FULL')
+            );
+        }
+
 		return true;
 	}
 
-	public function UnInstallDB()
+	public function unInstallDB()
 	{
+        Loader::includeModule('lang.academy');
+
+        $agentName = "Lang\Academy\Agent\OfferStatus::run();";
+        $res = \CAgent::GetList([], ["NAME" => $agentName, "MODULE_ID" => $this->MODULE_ID]);
+
+        if($res->Fetch()) {
+            \CAgent::RemoveAgent($agentName, $this->MODULE_ID);
+        }
+
 		return true;
 	}
 

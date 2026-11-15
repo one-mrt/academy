@@ -52,15 +52,15 @@ $reviewTable = Data::getTableString('LangReview')
     ->set('uo', 1);
 
 
-$payAccount = Data::getTableString("LangBalansOutAccount")::query()
-    ->setSelect(['IBLOCK_ID', 'lName.VALUE', 'nName.VALUE', 'spb_' => 'spb.VALUE'])
-    ->where('ACTIVE', 'Y')
-    ->where('usr.VALUE', 1)
-    ->where('pays.VALUE', 872)
-    ->where('ID', 893)
-    ->fetch();
+// $payAccount = Data::getTableString("LangBalansOutAccount")::query()
+//     ->setSelect(['IBLOCK_ID', 'lName.VALUE', 'nName.VALUE', 'spb_' => 'spb.VALUE'])
+//     ->where('ACTIVE', 'Y')
+//     ->where('usr.VALUE', 1)
+//     ->where('pays.VALUE', 872)
+//     ->where('ID', 893)
+//     ->fetch();
 
-echo '<pre>', print_r($payAccount, 1), '</pre>';
+// echo '<pre>', print_r($payAccount, 1), '</pre>';
 
 // $save = $reviewTable->save();
 

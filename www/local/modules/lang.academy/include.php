@@ -17,6 +17,7 @@ Loader::registerAutoLoadClasses(
         "Lang\Academy\ImUsersFilter" => "lib/academy/imUsersFilter.php",
         "Lang\Academy\CodeEmail" => "lib/academy/codeEmail.php",
         "Lang\Academy\ReviewRating" => "lib/academy/reviewRating.php",
+        "Lang\Academy\Agent\OfferStatus" => "lib/academy/agent/offerStatus.php",
     ]
 );
 ?>

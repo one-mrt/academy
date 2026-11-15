@@ -44,10 +44,6 @@ class LangOrderOfferList extends CBitrixComponent
         $this->arResult['userId'] = intval($this->user->getId());
 
         $this->offer = Data::getTableString($this->langOrderOffer)::createObject();
-
-        if($this->arResult['userId'] > 0 && Loader::includeModule("pull")) {
-            \CPullWatch::Add($this->arResult['userId'], 'LangOrderOfferUpdate');
-        }
     }
 
     public function onPrepareComponentParams($arParam)

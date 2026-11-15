@@ -405,7 +405,7 @@ class LangOrderOffer extends CBitrixComponent
             $this->query
                 ->setOrder(['DATE_CREATE' => 'DESC', 'ID' => 'DESC'])
                 ->setSelect([
-                    'ID', 'PREVIEW_TEXT', 'DATE_CREATE', 'CREATED_BY',
+                    'ID', 'PREVIEW_TEXT', 'DATE_CREATE', 'TIMESTAMP_X', 'CREATED_BY',
                     'ofr.VALUE', 'sum.VALUE', 'usr.VALUE', 'sel.VALUE', 'acp.VALUE',
                     'USER.NAME', 'USER.LAST_NAME', 'USER.LOGIN', 'USER.PERSONAL_PHOTO',
                 ])
@@ -435,30 +435,12 @@ class LangOrderOffer extends CBitrixComponent
 
                 foreach($this->offerList as $offer) {
                     $sum = intval($offer->getSum()->getValue());
-
-                    $dayMillisec = strtotime('+12 hours', strtotime($offer->getDateCreate()));
-
+                    $dayMillisec = strtotime('+12 hours', strtotime($offer->getTimestampX()));
                     $date = new DateTime(date('Y-m-d H:i:s'));
-                    // // $date->modify('+24 hours');
-                    $date2 = new DateTime(date('Y-m-d H:i:s', $dayMillisec)); //new DateTime(strtotime($offer->getDateCreate()) + $dayMillisec);
-                    // $date2->modify('+24 hours');
-
+                    $date2 = new DateTime(date('Y-m-d H:i:s', $dayMillisec));
                     $diff = $date->diff($date2);
-
-                    // echo date('Y-m-d H:i:s', strtotime($offer->getDateCreate())) . '<br>';
-                    // echo date('Y-m-d H:i:s', $dayMillisec) . '<br>';
-
-                    // echo $diff->format("%H:%I:%S (Полных дней: %a)") . '<br>';
-
-                    // echo '<pre>';
-                    // var_dump($diff);
-                    // echo '</pre>';
-
-                    // echo $diff->h, ' ', $diff->i, ' ', $diff->s;
-
                     $time = $dayMillisec - strtotime(date('d.m.Y H:i:s'));
                     $timeEnd = $dayMillisec - $time;
-                    // echo $time;
 
                     $this->arResult['offer'][$offer->getId()] = [
                         'id' => $offer->getId(),
@@ -470,9 +452,6 @@ class LangOrderOffer extends CBitrixComponent
                         'preorder' => $offer->getSel()?->getValue() == 'Y' ? 'y' : 'n',
                         'timeEnd' => $diff,
                     ];
-                    // echo date('d.m.Y H:i:s') . '<br>';
-                    // echo date('d.m.Y H:i:s', $timeEnd) . '<br>';
-                    // echo date('d.m.Y H:i:s', strtotime($offer->getDateCreate()));
 
                     if($offer->getCreatedBy() == $this->arResult['selected']) {
                         $this->arResult['offer'][$offer->getId()]['selected'] = 'y';
