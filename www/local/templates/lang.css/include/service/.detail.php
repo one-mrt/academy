@@ -11,7 +11,11 @@ $langExample = "LangExample{$lang}";
 $langReview = "LangReview{$lang}";
 
 $service = Data::getElementObject($langService,
-    ['NAME', 'ban', 'sum', 'time', 'orig', 'gost', 'dor', 'srav', 'edge', 'price', 'rev', 'exm', 'step', 'edg', 'unq', 'seo', 'faq', 'art'],
+    [
+        'NAME', 'ban.VALUE', 'sum.VALUE', 'time.VALUE', 'orig.VALUE', 'gost.VALUE', 'dor.VALUE',
+        'srav.VALUE', 'edge.VALUE', 'price.VALUE', 'rev.VALUE', 'exm.VALUE', 'step.VALUE', 'edg.VALUE',
+        'unq.VALUE', 'seo.VALUE', 'faq.VALUE', 'art.VALUE'
+    ],
     ['CODE' => $arParams['code']]
 );
 ?>

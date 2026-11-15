@@ -4,27 +4,17 @@ use Lang\Css\Component as comp;
 use Bitrix\Main\Localization\Loc;
 ?>
 
-
 <div class="lang-order-add--content w-100 h-100 d-f ai-c jc-c bc-w">
 	<div class="w-100 sm:mw-540px p-32 sm:p-64 d-f fd-c rg-32 r-24">
 
 		<div class="w-100 d-f fd-c rg-16">
 			<h1 class="mb-0 ff-ud f-24 ftw-6 tt-l ls--1 lh-1.125 ta-c">Создание заказа</h1>
-			<div class="f-12 sm:f-14 ta-c">
+			<div class="f-12 sm:f-14 ta-c c-8c94a8">
 				наши эксперты могут помочь как написать работу с нуля по вашим требованиям, так и помочь с уже начатой работой. Создайте заказ и опишите все пожелания, наши специалисты в ближайшее время примут заказ
 			</div>
 		</div>
 
-		<?if(!empty($arResult['error'])):?>
-			<div class="w-100 d-f fd-c rg-8">
-				<?foreach($arResult['error'] as $mError):?>
-					<div class=""><?=$mError?></div>
-				<?endforeach;?>
-			</div>
-		<?endif;?>
-
-		<form class="w-100 d-f fd-c rg-24" method="post" action="<?=$arResult["AUTH_URL"]?>">
-
+		<form class="w-100 d-f fd-c rg-24">
 			<?=bitrix_sessid_post();?>
 
 			<input type="hidden" name="order" value="y">
@@ -38,15 +28,16 @@ use Bitrix\Main\Localization\Loc;
 				<div class="lang-select--list w-100 pn-r">
 
 					<input class="lang-select--text w-100 pt-16 pr-24 pb-16 pl-24 r-8 bw-1 bs-s bcr-C5C5C5 h:bcr-py c-dt tn-all-3 pn-r z-1"
-						type="text" name="typeV" maxlength="255" value="" placeholder="тип работы" required>
+						type="text" name="typeV" maxlength="255" value="<?=$arResult['typeV']?>" placeholder="тип работы" required>
 
 					<div class="lang-select--close w-100 h-100 pn-f t-0 rt-0 b-0 l-0 d-n"></div>
 
 					<div class="lang-select--items w-100 mxh-200px ofw-h r-8 d-n d-f fd-c pn-a t-0 l-0 pt-52 bc-C5C5C5 bw-1 bs-s bcr-C5C5C5">
 						<div class="w-100 h-100 d-f fd-c ofy-a f-14">
-							<?foreach($arResult['type'] as $type):?>
+							<?foreach($arResult['typeWork'] as $type):?>
 								<label for="type<?=$type['id']?>" class="lang-select--item m-0 pby-8 pix-24 cr-p h:bc-w tn-all-3">
-									<input class="d-n" type="radio" name="type" value="<?=$type['id']?>" id="type<?=$type['id']?>" required>
+									<input class="d-n" type="radio" name="type" value="<?=$type['id']?>" id="type<?=$type['id']?>" required
+									<?=($arResult['type'] == $type['id']) ? 'checked' : ''?>>
 									<div class="lang-select--name"><?=$type['name']?></div>
 								</label>
 							<?endforeach?>
@@ -59,6 +50,14 @@ use Bitrix\Main\Localization\Loc;
 						type="text" name="email" maxlength="255" value="<?=$arResult["email"]?>" placeholder="Email" required>
 				</div>
 			</div>
+
+			<?if(!empty($arResult['error'])):?>
+				<div class="w-100 d-f fd-c rg-8">
+					<?foreach($arResult['error'] as $mError):?>
+						<div class="c-c90536 f-12 ta-c"><?=$mError?></div>
+					<?endforeach;?>
+				</div>
+			<?endif;?>
 
 			<div class="d-f jc-c">
 				<button class="<?=comp::get("btnPurpleLg")?>"type="submit" name="add" value="Создать заказ">Создать заказ</button>
@@ -133,8 +132,14 @@ use Bitrix\Main\Localization\Loc;
 
 				initList() {
 					this.itemList?.forEach(item => {
-						item.querySelector('input')
-							?.addEventListener('change', this.initItem.bind(this, item.querySelector('.lang-select--name')))
+						let type = item.querySelector('input')
+						let text = item.querySelector('.lang-select--name')
+
+						type?.addEventListener('change', this.initItem.bind(this, text))
+
+						if(type.checked) {
+							this.initItem(text)
+						}
 					})
 				}
 

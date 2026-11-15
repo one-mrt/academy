@@ -6,7 +6,7 @@ $order = &$arResult['order'];
 ?>
 
 
-<div class="w-100 h-100 mxh-700px ofx-h ofy-a p-24 xl:p-32 d-f fd-c rg-24 bc-fafafa r-12">
+<div class="w-100 h-100 ofx-h ofy-a p-24 xl:p-32 d-f fd-c rg-24 bc-fafafa r-12">
     <div class="w-100 d-f fd-c rg-12">
         <h2 class="mb-0 fg-1 f-16 md:f-18 <?=comp::get("fontUd")?>"><?=$order['name']?></h2>
     </div>

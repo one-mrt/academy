@@ -35,7 +35,7 @@ $langReview = "LangReview";
 $currentUser = CurrentUser::get();
 
 $user = UserTable::getList([
-    'select' => ['NAME', 'LOGIN', 'LAST_NAME', 'PERSONAL_PHOTO', 'IS_ONLINE', 'DATE_REGISTER', 'PERSONAL_NOTES', 'UF_SPEC', 'UF_WORKTYPE'],
+    'select' => ['NAME', 'LOGIN', 'LAST_NAME', 'PERSONAL_PHOTO', 'IS_ONLINE', 'DATE_REGISTER', 'PERSONAL_NOTES', 'UF_SPEC', 'UF_WORKTYPE', 'UF_SCORE', 'UF_COUNT'],
     'filter' => ['ID' => $arParams['param']['userId']],
     'cache' => Data::getCache(3600)
 ])->fetchObject();

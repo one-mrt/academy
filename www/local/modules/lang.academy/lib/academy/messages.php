@@ -484,6 +484,21 @@ class Messages {
         return \CIMNotify::Add($message);
     }
 
+
+    public static function budgetOutOrder(array $param)
+    {
+        $serverName = self::getSite();
+        $param = [
+            "TO_USER_ID" => $param['toUser'],
+            "NOTIFY_TYPE" => IM_NOTIFY_SYSTEM,
+            "NOTIFY_MODULE" => "im",
+            "NOTIFY_TAG" => "pay|out|system|{$param['leadId']}",
+            'NOTIFY_MESSAGE' => "Сформирована заявка [b]№{$param['leadId']}[/b] на вывод средств в размере [b]{$param['sumOut']}[/b]"
+        ];
+
+        return \CIMNotify::Add($param);
+    }
+
     // public static function reviewAddCustomer(array $param)
     // {
     //     \CIMNotify::Add([

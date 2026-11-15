@@ -9,7 +9,7 @@ $langExample = "LangExample{$lang}";
 if(!empty($arParams['elementsId'])):
     $exampleTitle = Data::getElementObject($langText, ['NAME', 'PREVIEW_TEXT', 'link'], ['ID' => 302]);
     $exampleList = Data::getElementsObject($langExample, [
-        'select' => ['NAME', 'spec.ELEMENT', 'time', 'origin', 'tp.ITEM', 'price', 'file', 'price'],
+        'select' => ['NAME', 'spec.ELEMENT', 'time.VALUE', 'origin.VALUE', 'tp.ITEM', 'price.VALUE', 'file.VALUE'],
         'filter' => ['ID' => $arParams['elementsId']],
         'limit' => 10
     ]);
@@ -44,9 +44,13 @@ if(!empty($arParams['elementsId'])):
                 <div class="w-100 pn-r d-f fd-c rg-32">
                     <div class="swiper lang-example-card--<?=$ID?> w-100">
 					    <div class="swiper-wrapper d-f">
-                            <?foreach($exampleList as $example):?>
+                            <?foreach($exampleList as $example):
+                                if(!empty($example->getFile()?->getValue())) {
+                                    $file = \CFile::GetPath($example->getFile()?->getValue());
+                                }
+                                ?>
                                 <div class="swiper-slide lg:w-6/12 xl:w-4/12">
-                                    <div class="w-100 h-100 p-32 md:p-24 d-f fd-c rg-24 bc-w bw-1 bs-s bcr-C5C5C5 r-12" <?=Data::iblockElementEditAddId($example)?>>
+                                    <a href="<?=$file?>" target="_blank" class="w-100 h-100 p-32 md:p-24 d-f fd-c rg-24 bc-w bw-1 bs-s bcr-C5C5C5 r-12 h:bcr-dt h:c-w tn-all-3 h:bc-dt" <?=Data::iblockElementEditAddId($example)?>>
                                         <?if(!empty($example->getTp()->getItem()) && !empty($example->getTp()->getItem()->getValue())):?>
                                             <div class="d-f jc-s">
                                                 <div class="f-8 pt-4 pr-8 pb-4 pl-8 r-4 bi-sbb c-w lh-1 tt-l"><?=$example->getTp()->getItem()->getValue()?></div>
@@ -96,7 +100,7 @@ if(!empty($arParams['elementsId'])):
                                             
                                         </div>
 
-                                    </div>
+                                    </a>
                                 </div>
                             <?endforeach;?>
                         </div>

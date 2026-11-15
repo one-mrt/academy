@@ -10,13 +10,11 @@ use Bitrix\Main\Loader;
 use Bitrix\Main\Context;
 use Bitrix\Main\UserTable;
 use Bitrix\Main\ORM\Query\Join;
-// use Bitrix\Main\ORM\Query\Query;
 use Bitrix\Main\Localization\Loc;
 use Lang\Main\Iblock\Util as Data;
 use Bitrix\Main\Engine\CurrentUser;
-// use Bitrix\Catalog\PriceTable as Price;
-// use Bitrix\Sale\Internals\StatusLangTable;
 use Bitrix\Main\ORM\Fields\Relations\Reference;
+use Bitrix\Main\Text\HtmlFilter;
 
 class LangAddReview extends CBitrixComponent
 {
@@ -98,7 +96,7 @@ class LangAddReview extends CBitrixComponent
             $this->arResult['add'] = 'y';
 
             $this->arResult['score'] = intval($this->request->getPost('score'));
-            $this->arResult['description'] = htmlspecialcharsbx($this->request->getPost('description'));
+            $this->arResult['description'] = HtmlFilter::endcode($this->request->getPost('description'));
 
             if($this->arResult['score'] <= 0 && $this->arResult['score'] > 5) {
                 $this->arResult['error']['noedit'] = "Вы не можете оставить отзыв";

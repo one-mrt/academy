@@ -90,19 +90,21 @@ if(!empty($priceTitle) && !empty($priceTitle->getId())):
                                             <?if(in_array($row->getId(), $priceList->getIblockSectionIdList())):?>
                                                 <div class="lang-price--description w-100 d-n d-f fd-c rg-12 pix-24 md:pix-24 xl:pix-32 pb-24 md:pb-24 xl:pb-32">
                                                     <?foreach($priceList as $price):?>
-                                                        <div class="w-100" <?=Data::iblockElementEditAddId($price)?>>
-                                                            <div class="<?=$modRow?>">
-                                                                <div class="<?=$modColName?> <?=comp::get("setcol")?> d-f cg-12 lh-1">
-                                                                    <div class="f-12 xl:f-14 tt-l ftw-5 pl-24 md:pl-24 xl:pl-32"><?=$price->getName()?></div>
-                                                                </div>
-
-                                                                <?foreach($price->getText()->getAll() as $text):?>
-                                                                    <div class="<?=$modColData?> <?=comp::get("setcol")?>">
-                                                                        <div class="f-12 xl:f-14 tt-l ftw-5"><?=$text->getValue()?></div>
+                                                        <?if($price->getIblockSectionId() == $row->getId()):?>
+                                                            <div class="w-100" <?=Data::iblockElementEditAddId($price)?>>
+                                                                <div class="<?=$modRow?>">
+                                                                    <div class="<?=$modColName?> <?=comp::get("setcol")?> d-f cg-12 lh-1">
+                                                                        <div class="f-12 xl:f-14 tt-l ftw-5 pl-24 md:pl-24 xl:pl-32"><?=$price->getName()?></div>
                                                                     </div>
-                                                                <?endforeach?>
+
+                                                                    <?foreach($price->getText()->getAll() as $text):?>
+                                                                        <div class="<?=$modColData?> <?=comp::get("setcol")?>">
+                                                                            <div class="f-12 xl:f-14 tt-l ftw-5"><?=$text->getValue()?></div>
+                                                                        </div>
+                                                                    <?endforeach?>
+                                                                </div>
                                                             </div>
-                                                        </div>
+                                                        <?endif?>
                                                     <?endforeach?>
                                                 </div>
                                             <?endif;?>

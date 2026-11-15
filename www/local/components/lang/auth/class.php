@@ -61,7 +61,6 @@ class LangAuth extends CBitrixComponent
         $request = Context::getCurrent()->getRequest();
 
         if(!$user->IsAuthorized()) {
-
             if($this->isSubmit()) {
                 if(check_bitrix_sessid()) {
                     $this->prepareData();

@@ -8,6 +8,7 @@ LG.LKBalansOut = class extends LG.Modal
     field
     numField
     inSumEnd
+    sumMax
     format
 
     constructor() {
@@ -40,7 +41,7 @@ LG.LKBalansOut = class extends LG.Modal
                 suffix: " ₽",
                 groupSeparator: " ", // Разделитель групп (например, точка для тысяч)
                 alias: "numeric", // Псевдоним для базового числового формата
-                placeholder: "", // Заполнитель для пустых позиций
+                // placeholder: "", // Заполнитель для пустых позиций
                 autoGroup: true, // Автоматически добавлять разделители групп
                 digits: 0, // Количество цифр после запятой
                 digitsOptional: true, // Обязательно ли вводить цифры
@@ -65,6 +66,8 @@ LG.LKBalansOut = class extends LG.Modal
         Inputmask.extendAliases(param)
 
         new Inputmask("payout", {}).mask(this.field)
+
+        this.mathFee()
     }
 
     typeMaskCard(field) {
@@ -94,6 +97,7 @@ LG.LKBalansOut = class extends LG.Modal
     searchInputType() {
         this.field = this.content?.querySelector('.payout--sum')
         this.inSumEnd = this.content?.querySelector('.lang-sum--end')
+        this.sumMax = this.content?.querySelector('.sum--max')
         
         this.content?.querySelectorAll('.paysystem--card')?.forEach(field => {
             LG.loadJS("/local/templates/lang.css/js/inputmask.min.js", this.typeMaskCard.bind(this, field))
@@ -107,13 +111,47 @@ LG.LKBalansOut = class extends LG.Modal
             this.field.value = this.currentPay.mn ?? 1
             LG.loadJS("/local/templates/lang.css/js/inputmask.min.js", this.typeMaskCurrency.bind(this))
             this.field.addEventListener('input', this.mathFee.bind(this))
-            this.field.addEventListener('blur', this.mathFee.bind(this))
+            this.field.addEventListener('blur', this.mathFeeBlur.bind(this))
+            this.sumMax?.addEventListener('click', this.pasteSumMax.bind(this))
             this.mathFee()
         }
     }
 
+    pasteSumMax() {
+        if(this.currentPay.com > 0) {
+            let com1 = (this.currentPay.com / 100) * this.currentPay.budget
+            let budgetCom = this.currentPay.budget - com1
+            let com2 = budgetCom * (this.currentPay.com / 100)
+            let comEnd = com1 - com2
+            let endSum = Math.floor(budgetCom + comEnd)
+
+            this.field.value = endSum
+        } else {
+            this.field.value = this.currentPay.budget
+        }
+        this.mathFee()
+    }
+
     numberFormat(number) {
         return this.format.format(number)
+    }
+
+    mathFeeBlur() {
+        let min = 0;
+        this.numField = Number(this.field.value.replace(/\D/g, ""))
+
+        if(Number(this.field.min) > 0) {
+            min = Number(this.field.min)
+        } else {
+            min = this.currentPay.mn
+        }
+
+        if(this.numField <= 0) {
+            this.field.value = min
+            this.numField = min
+        }
+
+        this.mathFee()
     }
 
     mathFee() {

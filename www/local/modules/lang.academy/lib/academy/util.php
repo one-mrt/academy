@@ -63,20 +63,37 @@ class Util {
 
     public static function getAcceptFile(): array
     {
-        return [
-            'image/png',
-            'image/jpeg',
-            'application/pdf',
-            'application/msword',
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'application/vnd.ms-excel',
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'application/vnd.ms-powerpoint',
-            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-            'application/zip',
-            'application/x-zip-compressed',
-            'application/x-rar-compressed',
-        ];
+        $fileType = [];
+
+        $fileTypeList = Data::getElementsObject(self::$langText, [
+            'select' => ['text.VALUE'],
+            'filter' => ['IBLOCK_SECTION_ID' => 169]
+        ]);
+
+        if(!$fileTypeList->isEmpty()) {
+            foreach($fileTypeList as $iFile) {
+                foreach($iFile->getText()?->getAll() as $type) {
+                    $fileType[] = $type->getValue();
+                    break;
+                }
+            }
+        }
+
+        // return [
+        //     'image/png',
+        //     'image/jpeg',
+        //     'application/pdf',
+        //     'application/msword',
+        //     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        //     'application/vnd.ms-excel',
+        //     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        //     'application/vnd.ms-powerpoint',
+        //     'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        //     'application/zip',
+        //     'application/x-zip-compressed',
+        //     'application/x-rar-compressed',
+        // ];
+        return $fileType;
     }
 
     public static function getAcceptFileIcon(): array

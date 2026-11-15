@@ -25,7 +25,7 @@ $specList = Data::getElementsObject("LangLkSpec", ['select' => ['NAME']]);
                 
                 <div class="w-100 <?=comp::get('setcol8')?>">
                     <input class="w-100 pby-12 pix-24 r-8 bw-1 bs-s bcr-C5C5C5 h:bcr-py c-dt tn-all-3" type="text" name="name" value="<?=$sessionFilter['name']?>"
-                        placeholder="поиск по фамилии">
+                        placeholder="поиск по имени или фамилии">
                 </div>
 
                 <div class="w-100 xl:w-6/12 <?=comp::get('setcol8')?>">

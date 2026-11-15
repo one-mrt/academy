@@ -2,6 +2,7 @@
 
 use Lang\Css\Component as comp;
 use Lang\Main\Iblock\Util as Data;
+use Bitrix\Currency\CurrencyManager;
 
 ?>
 
@@ -102,13 +103,13 @@ use Lang\Main\Iblock\Util as Data;
         </div>
     <?else:?>
         <?if(empty($arResult['error']['payout'])):?>
-            <div class="w-100 p-32 bbw-1 bbs-s bcr-CECECE">
+            <div class="w-100 d-f fd-c rg-8 p-32 bbw-1 bbs-s bcr-CECECE">
                 <div class="w-100 d-f cg-16">
                     <div class="d-f fd-c rg-12 fg-1">
                         <label for="sumPay" class="mb-0 c-8c94a8 f-12">Введите сумму вывода</label>
                         <div class="w-100 d-f ai-c cg-16">
                             <input id="sumPay" class="payout--sum <?=comp::get("textDefault")?>"
-                                min="<?=$arResult['payData']['mnOut']?>" max="<?=$arResult['payData']['mxOut']?>"
+                                min="<?=$arResult['payData']['mnOut']?>" max="<?=$arResult['budgetOut']?>"
                                 value="<?=$arResult['payData']['mxOut']?>"
                                 type="text" name="sumPay" placeholder="1000" required="">
                         </div>
@@ -117,6 +118,12 @@ use Lang\Main\Iblock\Util as Data;
                         <label class="mb-0 c-8c94a8 f-12">С комиссией</label>
                         <div class="lang-sum--end <?=comp::get("textDefault")?> ws-nw c-c90536"><?=$arResult['comOutPrint']?></div>
                         <?/*≈<?=$arResult['scomPrint']?>*/?>
+                    </div>
+                </div>
+                <div class="w-100 d-f ai-e jc-s cg-4 f-12">
+                    <div class="lh-1 c-8c94a8">максимальная</div>
+                    <div class="sum--max m-0 p-0 bw-0 bc-t h:c-py tdt-1 tuo-2 tdc-py tdl-u tn-all-3 cr-p f-14">
+                        <?=\SaleFormatCurrency($arResult['budgetOut'], CurrencyManager::getBaseCurrency());?>
                     </div>
                 </div>
             </div>

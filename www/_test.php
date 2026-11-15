@@ -14,11 +14,84 @@ use \Bitrix\Im\Bot\Keyboard;
 
 use Lang\Academy\Order;
 
+use Bitrix\Main\ORM\EventManager;
+use Bitrix\Main\ORM\Data\DataManager;
+
 Loader::includeModule('im');
 Loader::includeModule('sale');
 Loader::includeModule('lang.academy');
 
-use Bitrix\Main\Engine\CurrentUser;
+// EventManager::getInstance()->addEventHandler(
+//     Bitrix\Iblock\Elements\ElementLangReviewTable::class,
+//     DataManager::EVENT_ON_AFTER_ADD,
+//     [Lang\Academy\ReviewRating::class, 'onAfterAddReview']
+// );
+
+// EventManager::getInstance()->registerEventHandler(
+//     Bitrix\Iblock\Elements\ElementLangReviewTable::class,
+//     DataManager::EVENT_ON_BEFORE_ADD,
+//     'lang.academy',
+//     Lang\Academy\ReviewRating::class,
+//     'onAfterAddReview'
+// );
+
+// EventManager::getInstance()->unRegisterEventHandler(
+//     Bitrix\Iblock\Elements\ElementLangReviewTable::class,
+//     DataManager::EVENT_ON_BEFORE_ADD,
+//     'lang.academy',
+//     Lang\Academy\ReviewRating::class,
+//     'onAfterAddReview'
+// );
+
+
+$reviewTable = Data::getTableString('LangReview')
+    ::createObject()
+    ->setName('Тест')
+    ->set('ur', 1)
+    ->set('score', 1)
+    ->set('uo', 1);
+
+
+$payAccount = Data::getTableString("LangBalansOutAccount")::query()
+    ->setSelect(['IBLOCK_ID', 'lName.VALUE', 'nName.VALUE', 'spb_' => 'spb.VALUE'])
+    ->where('ACTIVE', 'Y')
+    ->where('usr.VALUE', 1)
+    ->where('pays.VALUE', 872)
+    ->where('ID', 893)
+    ->fetch();
+
+echo '<pre>', print_r($payAccount, 1), '</pre>';
+
+// $save = $reviewTable->save();
+
+// if($save->isSuccess()) {
+//     echo $reviewTable->getId(), '<br>';
+// } else {
+//     echo '<pre>', print_r($save->getErrorMessages(), 1), '</pre>';
+// }
+
+// $iblock = \Bitrix\Iblock\Iblock::wakeUp("6");
+
+// echo $iblock->getEntityDataClass(), '<br>--';
+
+// Bitrix\Iblock\Elements\ElementLangReviewTable
+
+
+// echo Bitrix\Iblock\Element::OnBeforeAdd;
+
+// use Bitrix\Main\ORM\Data\DataManager;
+// use Bitrix\Main\EventManager;
+
+// $eventManager = EventManager::getInstance();
+
+// // Проверяем, есть ли обработчик для события OnAfterUserRegister в модуле main
+// if ($eventManager->hasEventHandler(\Bitrix\Iblock\Elements\ElementLangReviewTable::class, DataManager::EVENT_ON_AFTER_ADD)) {
+//     echo "Обработчик зарегистрирован.\n";
+// } else {
+//     echo "Обработчик не найден.\n";
+// }
+
+// use Bitrix\Main\Engine\CurrentUser;
 // CurrentUser::get()->getId();
 
 // if(intval(CurrentUser::get()->getId()) > 0) {

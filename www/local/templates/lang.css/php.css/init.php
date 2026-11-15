@@ -81,6 +81,7 @@ if($USER->IsAdmin() && $_GET['langUpdate'] == 'y'):?>
                     'mbn': 'linear-gradient(90deg, #43EACA 0%, #527CC8 67.31%, #0C4DA8 100%)',
                     'bgb': 'linear-gradient(29.41deg, #724A98 17.01%, #A16ABB 65.02%)',
                     'hb': 'linear-gradient(0deg, #724A98, #724A98)',
+                    'ht': 'linear-gradient(180deg, rgba(244, 244, 253, 0) 0%, #F4F4FD 90%)',
                 },
                 'box-shadow': {
                     '2': '0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23)',

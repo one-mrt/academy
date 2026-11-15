@@ -54,7 +54,12 @@ class lang_academy extends CModule {
 
 	function InstallEvents()
 	{
-		EventManager::getInstance()->registerEventHandler(
+        Loader::includeModule('iblock');
+        Loader::includeModule('lang.academy');
+
+        $eventManager = EventManager::getInstance();
+
+		$eventManager->registerEventHandler(
             'main',
             'OnBeforeProlog',
             $this->MODULE_ID,
@@ -62,7 +67,7 @@ class lang_academy extends CModule {
             'setUserActiveOnline'
         );
 
-		EventManager::getInstance()->registerEventHandler(
+		$eventManager->registerEventHandler(
             'im',
             'OnAfterConfirmNotify',
             $this->MODULE_ID,
@@ -70,7 +75,7 @@ class lang_academy extends CModule {
             'onSendNotifyResponsible'
         );
 
-		EventManager::getInstance()->registerEventHandler(
+		$eventManager->registerEventHandler(
             'rest',
             'OnRestServiceBuildDescription',
             $this->MODULE_ID,
@@ -78,7 +83,7 @@ class lang_academy extends CModule {
             'OnRestServiceBuildDescription'
         );
 
-		EventManager::getInstance()->registerEventHandler(
+		$eventManager->registerEventHandler(
             'sale',
             'OnSaleOrderBeforeSaved',
             $this->MODULE_ID,
@@ -86,7 +91,7 @@ class lang_academy extends CModule {
             'onUpdateOrder'
         );
 
-		EventManager::getInstance()->registerEventHandler(
+		$eventManager->registerEventHandler(
             'sale',
             'OnSaleOrderSaved',
             $this->MODULE_ID,
@@ -94,7 +99,7 @@ class lang_academy extends CModule {
             'onPullUpdateOrder'
         );
 
-		EventManager::getInstance()->registerEventHandler(
+		$eventManager->registerEventHandler(
             'iblock',
             'OnAfterIBlockElementUpdate',
             $this->MODULE_ID,
@@ -102,12 +107,30 @@ class lang_academy extends CModule {
             'onUpdateServiceOrder'
         );
 
-		EventManager::getInstance()->registerEventHandler(
+		$eventManager->registerEventHandler(
             'iblock',
             'OnIBlockPropertyBuildList',
             $this->MODULE_ID,
             'Lang\\Academy\\PropertyPaySystem',
             'GetUserTypeDescription'
+        );
+
+        // EventManager::getInstance()->registerEventHandler(
+        //     Bitrix\Iblock\Elements\ElementLangReviewTable::class,
+        //     DataManager::EVENT_ON_BEFORE_ADD,
+        //     'lang.academy',
+        //     Lang\Academy\ReviewRating::class,
+        //     'onAfterAddReview'
+        // );
+
+        $em = \Bitrix\Main\ORM\EventManager::getInstance();
+
+        $em->registerEventHandler(
+            Bitrix\Iblock\Elements\ElementLangReviewTable::class,
+            DataManager::EVENT_ON_AFTER_ADD,
+            $this->MODULE_ID,
+            Lang\Academy\ReviewRating::class,
+            'onAfterAddReview'
         );
 
 		return true;
@@ -115,7 +138,12 @@ class lang_academy extends CModule {
 
 	public function UnInstallEvents()
 	{
-		EventManager::getInstance()->unRegisterEventHandler(
+        Loader::includeModule('iblock');
+        Loader::includeModule('lang.academy');
+        
+        $eventManager = EventManager::getInstance();
+
+		$eventManager->unRegisterEventHandler(
             'main',
             'OnBeforeProlog',
             $this->MODULE_ID,
@@ -123,7 +151,7 @@ class lang_academy extends CModule {
             'setUserActiveOnline'
         );
 	
-		EventManager::getInstance()->unRegisterEventHandler(
+		$eventManager->unRegisterEventHandler(
             'im',
             'OnAfterConfirmNotify',
             $this->MODULE_ID,
@@ -131,7 +159,7 @@ class lang_academy extends CModule {
             'onSendNotifyResponsible'
         );
 
-		EventManager::getInstance()->unRegisterEventHandler(
+		$eventManager->unRegisterEventHandler(
             'rest',
             'OnRestServiceBuildDescription',
             $this->MODULE_ID,
@@ -139,7 +167,7 @@ class lang_academy extends CModule {
             'OnRestServiceBuildDescription'
         );
 
-		EventManager::getInstance()->unRegisterEventHandler(
+		$eventManager->unRegisterEventHandler(
             'sale',
             'OnSaleOrderBeforeSaved',
             $this->MODULE_ID,
@@ -147,7 +175,7 @@ class lang_academy extends CModule {
             'onUpdateOrder'
         );
 
-		EventManager::getInstance()->unRegisterEventHandler(
+		$eventManager->unRegisterEventHandler(
             'sale',
             'OnSaleOrderSaved',
             $this->MODULE_ID,
@@ -155,7 +183,7 @@ class lang_academy extends CModule {
             'onPullUpdateOrder'
         );
 
-		EventManager::getInstance()->unRegisterEventHandler(
+		$eventManager->unRegisterEventHandler(
             'iblock',
             'OnAfterIBlockElementUpdate',
             $this->MODULE_ID,
@@ -163,12 +191,22 @@ class lang_academy extends CModule {
             'onUpdateServiceOrder'
         );
 
-		EventManager::getInstance()->unRegisterEventHandler(
+		$eventManager->unRegisterEventHandler(
             'iblock',
             'OnIBlockPropertyBuildList',
             $this->MODULE_ID,
             'Lang\\Academy\\PropertyPaySystem',
             'GetUserTypeDescription'
+        );
+
+        $em = \Bitrix\Main\ORM\EventManager::getInstance();
+
+        $em->unRegisterEventHandler(
+            Bitrix\Iblock\Elements\ElementLangReviewTable::class,
+            DataManager::EVENT_ON_AFTER_ADD,
+            $this->MODULE_ID,
+            Lang\Academy\ReviewRating::class,
+            'onAfterAddReview'
         );
 
 		return true;

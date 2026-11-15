@@ -188,7 +188,6 @@ $user = CurrentUser::get();
         <?CJSCore::Init(['ajax']);?>
 
         <?if(empty($user->getId())):?>
-            <style class="brr-12 blr-12"></style>
             <div class="lang-modal--wrap w-100 h-100 pn-f t-0 rt-0 b-0 l-0 d-f d-n ai-s jc-c bc-f4eff95e bf-b6 z-2">
                 <div class="lang-modal--container pn-r of-h bxs-au mi-16 brr-12 blr-12 tnd-500ms tp-t t-0 t--100% bc-w">
                     <div class="lang-modal--content w-100 h-100"></div>
@@ -209,6 +208,7 @@ $user = CurrentUser::get();
             <script><?=file_get_contents("{$templatePath}/js/lk/userAuth.js")?></script>
             <script>new LG.Auth()</script>
         <?else:?>
+            <style class="brr-12 blr-12 f-32 pix-0 pix-4 mr-8"></style>
             <script class=""><?=file_get_contents("{$templatePath}/js/experts/orderPrivate.js")?></script>
             <script>new LG.AddOrder()</script>
         <?endif?>

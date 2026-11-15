@@ -67,7 +67,7 @@ final class Page extends Controller
 	#[Prefilters([new Csrf(tokenName: 'sessid', returnNew: false)])]
 	public function orderAddAction(): ComponentResponse
 	{
-		return $this->renderComponentAjax('lang:order.add', '', [], [], []);
+		return $this->renderComponentAjax('lang:order.add', '', [], [], ['order', 'orderUrl']);
 	}
 
 	// Сессия

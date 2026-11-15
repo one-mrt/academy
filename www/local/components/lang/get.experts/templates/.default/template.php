@@ -9,6 +9,7 @@ Loader::includeModule('lang.css');
 $lang = Data::getLang();
 $langText = "LangText{$lang}";
 $likeList = Data::getElementsObject($langText, ['select' => ['NAME', 'svg'],'filter' => ['IBLOCK_SECTION_ID' => 64]]);
+$ratingList = Data::getElementsObject($langText, ['select'=>['NAME','svg'], 'filter' => ['IBLOCK_SECTION_ID' => 65]]);
 ?>
 
 <?if(!empty($arResult['expert']) && !$arResult['expert']->isEmpty()):?>
@@ -19,7 +20,7 @@ $likeList = Data::getElementsObject($langText, ['select' => ['NAME', 'svg'],'fil
             $title = $user->getLogin();
         }
         ?>
-        <a href="/experts/<?=$user->getLogin()?>/" class="w-100 p-24 sm:p-32 bw-1 bs-s bcr-CECECE h:bcr-py r-12 bc-w tn-all-3">
+        <a href="/experts/<?=$user->getLogin()?>/" class="w-100 p-24 sm:p-32 bw-1 bs-s bcr-CECECE h:bcr-py r-12 bc-w h:bc-t tn-all-3">
             <div class="<?=comp::get("row")?>">
                 <div class="w-100 xl:w-6/12 <?=comp::get("setcol")?>">
                     <div class="w-100 h-100 d-f ai-c cg-24">
@@ -39,21 +40,29 @@ $likeList = Data::getElementsObject($langText, ['select' => ['NAME', 'svg'],'fil
                             </div>
                         </div>
 
-                        <div class="d-f fd-c rg-12 fg-1">
-                            <div class="f-18 xl:f-20 ftw-6"><?=$title?></div>
-                            <div class="c-636363 f-14 lh-1 ftw-5 d-n md:d-b"><?=(!empty($user->getIsOnline())) ? "Сейчас онлайн" : "Сейчас офлайн"?></div>
-                            <?if(!empty($likeList) && !empty($likeList->getIdList())):?>
-                                <div class="d-f cg-32">
-                                    <?foreach($likeList as $like):?>
-                                        <div class="d-f ai-c cg-8" title="<?=$like->getName()?>" <?=Data::iblockElementEditAddId($like)?>>
-                                            <?if(!empty($like->getSvg())):?>
-                                                <div class="d-f"><?=file_get_contents($_SERVER['DOCUMENT_ROOT'] . \CFile::GetPath($like->getSvg()->getValue()))?></div>
-                                            <?endif;?>
-                                            <div class="xl:f-20 ftw-6 bi-st bgc-t tf-t lh-1">500</div>
+                        <div class="d-f fd-c rg-24 fg-1">
+                            <div class="w-100 d-f fd-c rg-12">
+                                <div class="f-18 xl:f-20 ftw-6"><?=$title?></div>
+                                <div class="c-636363 f-14 lh-1 ftw-5 d-n md:d-b"><?=(!empty($user->getIsOnline())) ? "Сейчас онлайн" : "Сейчас офлайн"?></div>
+                            </div>
+                            <div class="d-f cg-32">
+                                <?foreach($ratingList as $rating):?>
+                                    <div class="d-f ai-c cg-8 lh-1" title="<?=$rating->getName()?>">
+                                        <?if(!empty($rating->getSvg())):
+                                            $svgFile = $_SERVER['DOCUMENT_ROOT'] . \CFile::GetPath($rating->getSvg()->getValue());
+                                            ?>
+                                            <div class="d-f w-a>svg h-20px>svg"><?=file_get_contents($svgFile)?></div>
+                                        <?endif;?>
+                                        <div class="xl:f-18 ftw-6 lh-1">
+                                            <?if($rating->getId() == 252):?>
+                                                <?=$user->getUfCount() ?? 0?>
+                                            <?else:?>
+                                                <?=$user->getUfScore() ?? 0?>
+                                            <?endif?>
                                         </div>
-                                    <?endforeach?>
-                                </div>
-                            <?endif?>
+                                    </div>
+                                <?endforeach;?>
+                            </div>
                         </div>
                     </div>
                 </div>

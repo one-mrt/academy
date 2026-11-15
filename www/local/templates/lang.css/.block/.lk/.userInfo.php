@@ -16,17 +16,20 @@ $likeList = Data::getElementsObject($langText, ['select' => ['NAME', 'svg'],'fil
 $ratingList = Data::getElementsObject($langText, ['select'=>['NAME','svg'], 'filter' => ['IBLOCK_SECTION_ID' => 65]]);
 
 
-$reviewRating = Data::getTableString($langReview)::query()
-    ->setSelect(['251', '252'])
-    ->addGroup('ur.IBLOCK_GENERIC_VALUE')
-    ->where('ACTIVE', 'Y')
-    ->where('ur.VALUE', $user->getId())
-    ->registerRuntimeField(new ExpressionField('251', 'AVG(%s)', ['score.IBLOCK_GENERIC_VALUE']))
-    ->registerRuntimeField(new ExpressionField('252', 'COUNT(%s)', ['ID']))
-    ->setCacheTtl(3600)
-    ->cacheJoins(true)
-    ->exec()
-    ->fetch();
+// $reviewRating = Data::getTableString($langReview)::query()
+//     ->setSelect(['251', '252'])
+//     ->addGroup('ur.IBLOCK_GENERIC_VALUE')
+//     ->where('ACTIVE', 'Y')
+//     ->where('ur.VALUE', $user->getId())
+//     ->registerRuntimeField(new ExpressionField('251', 'AVG(%s)', ['score.IBLOCK_GENERIC_VALUE']))
+//     ->registerRuntimeField(new ExpressionField('252', 'COUNT(%s)', ['ID']))
+//     // ->setCacheTtl(3600)
+//     // ->cacheJoins(true)
+//     ->exec()
+//     ->fetch();
+
+$reviewRating[251] = $user->getUfScore() ?? 0;
+$reviewRating[252] = $user->getUfCount() ?? 0;
 
 $userFullName = "";
 

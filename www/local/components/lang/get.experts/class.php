@@ -61,7 +61,7 @@ class LangGetExperts extends CBitrixComponent
     private function initMessage()
     {
         if(empty($this->arResult['filter'])) {
-            $this->arResult['message'] = "Пока нет свободных заказов";
+            $this->arResult['message'] = "Нет экспертов";
         } else {
             $this->arResult['message'] = "Ничего не найдено";
         }
@@ -71,7 +71,11 @@ class LangGetExperts extends CBitrixComponent
     {
         if(!empty($this->arResult['filter'])) {
             if(!empty($this->arResult['filter']['name'])) {
-               $this->query->whereLike("LAST_NAME", "%{$this->arResult['filter']['name']}%");
+                $this->query->where(
+                    Query::filter()->logic('or')
+                        ->whereLike("LAST_NAME", "%{$this->arResult['filter']['name']}%")
+                        ->whereLike("NAME", "%{$this->arResult['filter']['name']}%")
+                );
             }
 
             if(!empty($this->arResult['filter']['sort'])) {
@@ -134,11 +138,11 @@ class LangGetExperts extends CBitrixComponent
         
         $this->query = UserTable::query()
             ->setSelect([
-                'NAME', 'LAST_NAME', 'PERSONAL_PHOTO', 'IS_ONLINE', 'GROUPS.GROUP_ID', 'LOGIN'
+                'NAME', 'LAST_NAME', 'PERSONAL_PHOTO', 'IS_ONLINE', 'GROUPS.GROUP_ID', 'LOGIN', 'UF_SCORE', 'UF_COUNT'
             ])
             ->where('ACTIVE', 'Y')
             ->where('GROUPS.GROUP_ID', 5)
-            ->setCacheTtl(3600)
+            ->setCacheTtl(3000)
             ->cacheJoins(true);
 
         $this->applyFilter();
@@ -162,7 +166,7 @@ class LangGetExperts extends CBitrixComponent
         if($this->arResult['nav']->getPageCount() > $this->arResult['nav']->getCurrentPage()) {
             $this->arResult['next'] = $this->arResult['nav']->getCurrentPage()+1;
         } else {
-            $this->arResult['next'] = 0;
+            $this->arResult['next'] = 1;
         }
 
         $this->IncludeComponentTemplate();

@@ -14,10 +14,14 @@ use Bitrix\Catalog\PriceTable as Price;
 use Bitrix\Sale\Internals\StatusLangTable;
 use Bitrix\Main\ORM\Fields\Relations\Reference;
 use Bitrix\Currency\CurrencyManager;
+use Bitrix\Main\Mail\Event;
+use Bitrix\Main\SiteTable;
+use Bitrix\Iblock\PropertyTable;
 
 use Bitrix\Main\Text\HtmlFilter;
 
 use Lang\Academy\Util as Academy;
+use Lang\Academy\Messages;
 
 class LangPayOut extends CBitrixComponent
 {
@@ -236,15 +240,134 @@ class LangPayOut extends CBitrixComponent
         return \SaleFormatCurrency($number, $this->arResult['currency']);
     }
 
+    private function sendMessageOutSum()
+    {
+        // Платежная система
+        // Счет пользователя
+        // Сумма вывода
+        // Пользователь
+
+        $site = SiteTable::getList([
+            'select' => ['SERVER_NAME'],
+            'filter' => ['LID' => SITE_ID],
+            'cache' => Data::getCache()
+        ])->fetchObject();
+
+        $mailFields = [
+            'leadName' => "{$this->arResult['userName']} - Заявка на вывод средств",
+            'leadId' => $this->arResult['lead'],
+            'linkLead' => "https://{$site->getServerName()}/bitrix/admin/iblock_element_edit.php?IBLOCK_ID=16&type=lang_ru_financy&lang=ru&ID={$this->arResult['lead']}&find_section_section=0&WF=Y",
+            'userName' => $this->arResult['userName'],
+            'sumCom' => $this->arResult['sumComEndPrint'],
+            'sumOut' => $this->arResult['sumPayNumberPrint'],
+            'payTable' => "",
+            'cardTable' => "",
+        ];
+
+        $picturePay = "https://{$site->getServerName()}" . \CFile::GetPath($this->arResult['payData']['picture']);
+        $mnCom = $this->formanNumber($this->arResult['payData']['mncom']);
+        $mn = $this->formanNumber($this->arResult['payData']['mn']);
+        $mx = $this->formanNumber($this->arResult['payData']['mx']);
+
+        $mailFields['payTable'] = '<table style="width:100%;border-collapse: collapse;" border="1">';
+        $mailFields['payTable'] .= "<tr><td colspan=\"2\" style=\"padding: 4px 8px;\"><img src=\"{$picturePay}\" width=\"50\" height=\"50\" style=\"object-position: center;object-fit: cover;\"></td></tr>";
+        $mailFields['payTable'] .= "<tr><td style=\"padding: 4px 8px;\">Наименование платежной системы</td>";
+        $mailFields['payTable'] .= "<td style=\"padding: 4px 8px;\">{$this->arResult['payData']['name']}</td></tr>";
+        $mailFields['payTable'] .= "<tr><td style=\"padding: 4px 8px;\">Коммисия</td>";
+        $mailFields['payTable'] .= "<td style=\"padding: 4px 8px;\">{$this->arResult['payData']['com']}%</td></tr>";
+        $mailFields['payTable'] .= "<tr><td style=\"padding: 4px 8px;\">Минимальная сумма комиссии</td>";
+        $mailFields['payTable'] .= "<td style=\"padding: 4px 8px;\">{$mnCom}</td></tr>";
+        $mailFields['payTable'] .= "<tr><td style=\"padding: 4px 8px;\">Минимальная сумма вывода</td>";
+        $mailFields['payTable'] .= "<td style=\"padding: 4px 8px;\">{$mn}</td></tr>";
+        $mailFields['payTable'] .= "<tr><td style=\"padding: 4px 8px;\">Максимальная сумма вывода</td>";
+        $mailFields['payTable'] .= "<td style=\"padding: 4px 8px;\">{$mx}</td></tr>";
+        $mailFields['payTable'] .= '</table>';
+
+        // $propertyCodeName = array_keys($this->arResult['payData']['sort']);
+        $propertyCodeName = [];
+        $select = ['IBLOCK_ID'];
+
+        foreach($this->arResult['payData']['sort'] as $iCodeName => $item) {
+            $select["{$iCodeName}_"] = "{$iCodeName}.VALUE";
+            $propertyCodeName[] = $iCodeName;
+        }
+
+        $payAccount = Data::getTableString($this->langBalansOutAccount)::query()
+            ->setSelect($select)
+            ->where('ACTIVE', 'Y')
+            ->where('usr.VALUE', $this->arResult['userId'])
+            ->where('pays.VALUE', $this->arResult['paySystem'])
+            ->where('ID', $this->arResult['payCard'])
+            ->fetch();
+
+        $property = PropertyTable::getList([
+            'filter' => ['IBLOCK_ID' => $payAccount['IBLOCK_ID'], 'CODE' => $propertyCodeName],
+            'select' => ['NAME', 'CODE'],
+            'cache' => Data::getCache()
+        ])->fetchAll();
+
+        $mailFields['cardTable'] = '<table style="width:100%;border-collapse: collapse;" border="1">';
+
+        foreach($property as $prop) {
+            $mailFields['cardTable'] .= "<tr><td style=\"padding: 4px 8px;\">{$prop["NAME"]}</td>";
+            $mailFields['cardTable'] .= "<td style=\"padding: 4px 8px;\">{$payAccount["{$prop['CODE']}_"]}</td></tr>";
+        }
+
+        $mailFields['cardTable'] .= '</table>';
+
+        Event::send([
+            "EVENT_NAME" => "onOrderSumOut",
+            'MESSAGE_ID' => 182,
+            "LID" => SITE_ID,
+            "C_FIELDS" => $mailFields,
+        ]);
+
+        Messages::budgetOutOrder([
+            'toUser' => $this->arResult['userId'],
+            'leadId' => $this->arResult['lead'],
+            'sumOut' => $this->arResult['sumPayNumberPrint']
+        ]);
+
+        // Academy::langWriteLog([$this->arResult, $mailFields, $payAccount, $select, $property], 'mailFields');
+    }
+
+    private function calcSumOut()
+    {
+        // Введенная сумма к выводу
+        // $this->arResult['sumPayNumber'];
+        // Расчитать сумму к выводу, она должна быть меньше или ровна budget
+
+        if($this->arResult['payData']['com'] > 0) {
+            $percent = $this->arResult['payData']['com'] / 100;
+            $com = $this->arResult['sumPayNumber'] * $percent;
+
+            if($com > $this->arResult['payData']['mncom']) {
+                $this->arResult['sumComEnd'] = intval($this->arResult['sumPayNumber'] + $com);
+            } else {
+                $this->arResult['sumComEnd'] = intval($this->arResult['sumPayNumber'] + $this->arResult['payData']['mncom']);
+            }
+        } else {
+            $this->arResult['sumComEnd'] = $this->arResult['sumPayNumber'];
+        }
+
+        $this->arResult['sumComEndPrint'] = $this->formanNumber($this->arResult['sumComEnd']);
+        $this->arResult['sumPayNumberPrint'] = $this->formanNumber($this->arResult['sumPayNumber']);
+        
+    }
+
+    // Окончательный вывод с отправкой сообщения и списанием со счета
     private function addPaySum()
     {
         if($this->arResult['addPaySum'] == 'y') {
             if($this->isSumOut() && $this->isAccount() && $this->isPaySystem()) {
+
+                $this->calcSumOut();
+
                 $lead = Data::getTableString($this->langBalansOutLead)::createObject()
                     ->setName("{$this->arResult['userName']} - Заявка на вывод средств")
                     ->set('pays', $this->arResult['paySystem'])
                     ->set('acc', $this->arResult['payCard'])
-                    ->set('sum', $this->arResult['sumPay'])
+                    ->set('sum', $this->arResult['sumComEndPrint']) // $this->arResult['sumPay'])
                     ->set('usr', $this->arResult['userId']);
 
                 $saveLead = $lead->save();
@@ -252,15 +375,17 @@ class LangPayOut extends CBitrixComponent
                 if($saveLead->isSuccess()) {
                     $outSumUpdate = \CSaleUserAccount::UpdateAccount(
                         $this->arResult['userId'],
-                        "-{$this->arResult['budgetOutFull']}",
+                        "-{$this->arResult['sumComEnd']}",
                         $this->arResult['currency'],
                         "MANUAL",
                         0,
                         "Вывод средств"
                     );
+                    
                     if(intval($outSumUpdate) > 0) {
                         $this->arResult['saveSumOut'] = 'y';
                         $this->arResult['lead'] = $saveLead->getId();
+                        $this->sendMessageOutSum();
                     } else {
                         $lead->delete();
                         $this->arResult['error'][] = "Внутренняя проблема, попробуйте вывести позже";
@@ -304,12 +429,16 @@ class LangPayOut extends CBitrixComponent
             if($this->arResult['payData']['com'] > 0) {
                 $com = ($this->arResult['payData']['com'] / 100) * $this->arResult['budget'];
 
-                if($com >= $this->arResult['payData']['mncom']) {
-                    $this->arResult['budgetOut'] = intval($this->arResult['budget'] - $com);
+                if($com > $this->arResult['payData']['mncom']) {
+                    $budgetCom = $this->arResult['budget'] - $com;
+                    $com2 = $budgetCom * ($this->arResult['payData']['com'] / 100);
+                    $comEnd = $com - $com2;
+
+                    $this->arResult['budgetOut'] = intval($budgetCom + $comEnd);
                     $this->arResult['comOut'] = ceil($com);
                     $this->arResult['comOutPrint'] = $this->formanNumber($this->arResult['comOut']);
                 } else {
-                    $this->arResult['payData']['mnOut'] = $this->arResult['payData']['mn'] + $this->arResult['payData']['mncom'];
+                    // $this->arResult['payData']['mnOut'] = $this->arResult['payData']['mn'] + $this->arResult['payData']['mncom'];
                     $this->arResult['budgetOut'] = intval($this->arResult['budget'] - $this->arResult['payData']['mncom']);
                     $this->arResult['comOut'] = ceil($this->arResult['payData']['mncom']);
                     $this->arResult['comOutPrint'] = $this->formanNumber($this->arResult['comOut']);
@@ -364,6 +493,8 @@ class LangPayOut extends CBitrixComponent
         } else {
             $this->arResult['error'] = "Не выбрана платежная система";
         }
+
+        // Academy::langWriteLog($this->arResult);
     }
 
     public function executeComponent()

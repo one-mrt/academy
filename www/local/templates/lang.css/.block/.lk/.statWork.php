@@ -32,7 +32,7 @@ $workStat = Data::getTableString($langService)::query()
     ->registerRuntimeField(new ExpressionField('cn', 'COUNT(%s)', ['STATUS.STATUS_ID']))
     ->addGroup('uex.IBLOCK_GENERIC_VALUE')
     ->addGroup('STATUS.STATUS_ID')
-    ->setCacheTtl(3600000)
+    ->setCacheTtl(360)
     ->cacheJoins(true)
     ->exec()
     ->fetchAll();

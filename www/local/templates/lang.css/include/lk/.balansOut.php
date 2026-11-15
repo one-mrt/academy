@@ -71,6 +71,7 @@ $payList = Data::getTableString("LangBalansPaySystem")::query()
                         'mn' => $pay->getMn()?->getValue(),
                         'mncom' => $pay->getMncom()?->getValue(),
                         'mx' => $pay->getMx()?->getValue(),
+                        'budget' => $budget["CURRENT_BUDGET"] ?? 0
                     ];
                     ?>
                     <div class="w-100 d-f">
@@ -136,8 +137,8 @@ $APPLICATION->SetPageProperty("description", strip_tags($blockTitle->getPreviewT
         </div>
     </div>
 </div>
-<style class="h:bc-CECECE w-51px h-51px atc-cc h:atc-py atc-py"></style>
-<script>LG.PaySystemOut = <?=json_encode($jsonPaySystem, JSON_FORCE_OBJECT)?></script>
+<style class="h:bc-CECECE w-51px h-51px atc-cc h:atc-py atc-py cg-4"></style>
+<script>LG.PaySystemOut = <?=json_encode($jsonPaySystem, JSON_NUMERIC_CHECK)?></script>
 <script><?=file_get_contents("{$templatePath}/js/main/util.js")?></script>
 <script><?=file_get_contents("{$templatePath}/js/main/modal.js")?></script>
 <script><?=file_get_contents("{$templatePath}/js/lk/lkBalansOut.js")?></script>

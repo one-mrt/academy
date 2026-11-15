@@ -6,6 +6,8 @@ LG.AddOrder = class extends LG.Dialog
     dataOrder
     method
     description
+    isPlag
+    plag
 
     constructor() {
         super()
@@ -66,6 +68,7 @@ LG.AddOrder = class extends LG.Dialog
     setData() {
         this.initLoaderFile()
         this.initTextEditor()
+        this.initPlag()
         this.sendData()
     }
 
@@ -125,6 +128,21 @@ LG.AddOrder = class extends LG.Dialog
         this.fileView = this.content.querySelector('.private--view-file')
 
         this.file.addEventListener('change', this.loaderFile.bind(this))
+    }
+
+    initPlag() {
+        this.isPlag = this.content.querySelector('.lang--is-plag')
+        this.plag = this.content.querySelector('.lang--plag')
+
+        this.isPlag.addEventListener('change', this.plagActive.bind(this))
+    }
+
+    plagActive() {
+        if(this.isPlag.checked) {
+            this.plag.classList.remove('d-n')
+        } else {
+            this.plag.classList.add('d-n')
+        }
     }
 
     getNewFile() {

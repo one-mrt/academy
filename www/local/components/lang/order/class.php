@@ -46,6 +46,9 @@ class LangOrder extends CBitrixComponent
         $this->user = CurrentUser::get();
         $this->query = Data::getTableString($this->servicOrderTable)::query();
         $this->arResult['userId'] = $this->user->getId();
+
+        $this->arResult['name'] = htmlspecialcharsbx($this->request->get('name'));
+        $this->arResult['type'] = intval($this->request->get('type'));
     }
 
     public function onPrepareComponentParams($arParam){
@@ -64,7 +67,7 @@ class LangOrder extends CBitrixComponent
         }
     }
 
-    private function prepareString(string $name = ""): string
+    private function prepareString(?string $name = ""): string
     {
         $name = strip_tags($name);
         $name = htmlspecialcharsbx($name);
